@@ -62,7 +62,7 @@ graph TD
 
 ## 🔄 User Flows
 Логика работы пользователя (Участника) на платформе:
-```
+```mermaid
 graph TD
     Start([Start: User Lands on Site]) --> Search[Search & Filter Events]
     Search -->|Select Event| EventPage[Event Details Page]
