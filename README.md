@@ -1,6 +1,3 @@
-```
-<div align="center">
-
 # 🏅 SpoitHub
 
 **Единая платформа для спортивных ивентов и маркетплейс экипировки**
@@ -181,7 +178,4 @@ spoithub/
 │   └── store/         # Product, Order, Cart
 ├── templates/         # HTML шаблоны
 └── static/            # Скомпилированные стили
-```
-
-<div align="center"> <sub>Developed by [Your Name] for Portfolio</sub> </div>
 ```
