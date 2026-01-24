@@ -63,29 +63,25 @@ graph TD
 ## 🔄 User Flows
 Логика работы пользователя (Участника) на платформе:
 ```
-sequenceDiagram
-    participant User
-    participant System
-    participant DB
-
-    Note over User, System: Сценарий: Покупка слота и мерча
-    User->>System: Поиск события (фильтр по городу)
-    System->>DB: Full-text Search Query
-    DB-->>System: Список событий
-    System-->>User: Результаты поиска
-
-    User->>System: Выбор билета + Добавление футболки в корзину
-    System->>System: Сохранение корзины в Session
+graph TD
+    Start([Start: User Lands on Site]) --> Search[Search & Filter Events]
+    Search -->|Select Event| EventPage[Event Details Page]
     
-    User->>System: Оформление заказа (Checkout)
-    alt Не авторизован
-        System-->>User: Форма регистрации/входа
-        User->>System: Вход в аккаунт
+    subgraph "Shopping Process"
+        EventPage -->|Select Ticket| Cart[Shopping Cart]
+        EventPage -->|Add Merch| Cart
     end
     
-    System->>DB: Создание Order и Registration
-    DB-->>System: Подтверждение
-    System-->>User: Страница успеха + QR-код
+    Cart --> Checkout{Is Logged In?}
+    
+    Checkout -->|No| Auth[Login / Register]
+    Auth --> Checkout
+    
+    Checkout -->|Yes| Payment[Confirm Order]
+    
+    Payment -->|Processing| DB[(Database)]
+    DB --> Success([Success Page & QR Code])
+
 ```
 
 ---
