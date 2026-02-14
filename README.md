@@ -58,7 +58,7 @@ DB_PORT=5432
 docker compose up --build
 ```
 
-- Backend: http://localhost:8000  
+- Backend: http://localhost:8888  
 - Postgres: localhost:5432
 
 ---
@@ -83,11 +83,11 @@ services:
   backend:
     build: ./backend
     container_name: delux_backend
-    command: python manage.py runserver 0.0.0.0:8000
+    command: python manage.py runserver 0.0.0.0:8888
     volumes:
       - ./backend:/app
     ports:
-      - "8000:8000"
+      - "8888:8888"
     depends_on:
       - db
     env_file:
