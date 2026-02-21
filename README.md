@@ -467,9 +467,9 @@ erDiagram
 
 ### Progress Tracker
 
-- [ ] Week 1 — Planning
-- [ ] Week 2 — Infra
-- [ ] Week 3 — DB + Models
+- [x] Week 1 — Planning
+- [x] Week 2 — Infra
+- [x] Week 3 — DB + Models
 - [ ] Week 4 — Auth JWT
 - [ ] Week 5 — Auth Roles + OAuth
 - [ ] Week 6 — Events + Tickets
