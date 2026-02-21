@@ -1,9 +1,10 @@
 @import 'tailwindcss';
 
-@theme {
-  --color-neon-cyan: #00f3ff;
-  --color-neon-purple: #b026ff;
-  --color-neon-blue: #0070f3;
+@layer base {
+  :root {
+    --color-neon-green: #39ff14;
+    --color-dark-green: #003300;
+  }
 }
 
 @layer base {
@@ -16,7 +17,7 @@
   }
   
   ::selection {
-    background-color: rgba(0, 243, 255, 0.3);
-    color: #fff;
+    background-color: var(--color-neon-green);
+    color: #000;
   }
 }
