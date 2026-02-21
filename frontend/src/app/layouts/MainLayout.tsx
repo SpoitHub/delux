@@ -11,47 +11,53 @@ export const MainLayout = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="bg-white shadow-sm">
+    <div className="min-h-screen flex flex-col bg-[#050505] text-gray-100 font-sans relative overflow-hidden">
+      {/* Futuristic background glow */}
+      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-cyan-500/20 rounded-full blur-[120px] pointer-events-none"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-purple-500/20 rounded-full blur-[120px] pointer-events-none"></div>
+
+      <header className="sticky top-0 z-50 bg-black/40 backdrop-blur-xl border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex">
-              <div className="flex-shrink-0 flex items-center">
-                <Link to="/" className="text-xl font-bold text-blue-600">Delux</Link>
-              </div>
-              <nav className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                <Link to="/events" className="text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300 text-sm font-medium">Events</Link>
-                <Link to="/shop" className="text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300 text-sm font-medium">Shop</Link>
+          <div className="flex justify-between h-20">
+            <div className="flex items-center">
+              <Link to="/" className="text-3xl font-extrabold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 drop-shadow-[0_0_15px_rgba(0,243,255,0.5)]">
+                DELUX
+              </Link>
+              <nav className="hidden sm:ml-10 sm:flex sm:space-x-8">
+                <Link to="/events" className="text-gray-300 hover:text-cyan-400 transition-colors duration-300 px-3 py-2 text-sm font-medium uppercase tracking-wider">Events</Link>
+                <Link to="/shop" className="text-gray-300 hover:text-cyan-400 transition-colors duration-300 px-3 py-2 text-sm font-medium uppercase tracking-wider">Shop</Link>
               </nav>
             </div>
-            <div className="flex items-center space-x-4">
-              <Link to="/cart" className="text-gray-500 hover:text-gray-700">Cart</Link>
+            <div className="flex items-center space-x-6">
+              <Link to="/cart" className="text-gray-300 hover:text-cyan-400 transition-colors duration-300 uppercase tracking-wider text-sm font-medium">
+                Cart
+              </Link>
               {isAuthenticated ? (
                 <div className="flex items-center space-x-4">
-                  <span className="text-sm text-gray-700">Hello, {user?.first_name || user?.email}</span>
+                  <span className="text-sm text-gray-400">[{user?.first_name || user?.email}]</span>
                   {user?.is_organizer && (
-                    <Link to="/crm" className="text-sm text-blue-600 hover:text-blue-800">CRM</Link>
+                    <Link to="/crm" className="text-sm text-purple-400 hover:text-purple-300 transition-colors uppercase tracking-wider font-medium">CRM</Link>
                   )}
-                  <button onClick={handleLogout} className="text-sm text-red-500 hover:text-red-700">Logout</button>
+                  <button onClick={handleLogout} className="text-sm text-red-400 hover:text-red-300 transition-colors uppercase tracking-wider font-medium">Logout</button>
                 </div>
               ) : (
-                <>
-                  <Link to="/login" className="text-gray-500 hover:text-gray-700">Login</Link>
-                  <Link to="/register" className="text-gray-500 hover:text-gray-700">Register</Link>
-                </>
+                <div className="flex items-center space-x-4">
+                  <Link to="/login" className="text-gray-300 hover:text-cyan-400 transition-colors text-sm uppercase tracking-wider font-medium">Login</Link>
+                  <Link to="/register" className="bg-cyan-500/10 border border-cyan-500/50 text-cyan-400 hover:bg-cyan-500 hover:text-black transition-all duration-300 px-4 py-2 rounded-full text-sm uppercase tracking-wider font-semibold shadow-[0_0_15px_rgba(0,243,255,0.2)] hover:shadow-[0_0_25px_rgba(0,243,255,0.6)]">Register</Link>
+                </div>
               )}
             </div>
           </div>
         </div>
       </header>
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
         <Outlet />
       </main>
 
-      <footer className="bg-gray-50 border-t border-gray-200">
+      <footer className="bg-black/50 border-t border-white/10 backdrop-blur-md relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <p className="text-center text-gray-500 text-sm">© 2026 Delux MVP. All rights reserved.</p>
+          <p className="text-center text-gray-500 text-sm tracking-widest">© 2026 DELUX MVP. SYSTEM ONLINE.</p>
         </div>
       </footer>
     </div>
