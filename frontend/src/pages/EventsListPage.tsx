@@ -1,0 +1,1 @@
+export const EventsListPage = () => <div>EventsListPage</div>;

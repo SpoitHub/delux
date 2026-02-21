@@ -1,0 +1,1 @@
+export const CrmProductsPage = () => <div>CrmProductsPage</div>;

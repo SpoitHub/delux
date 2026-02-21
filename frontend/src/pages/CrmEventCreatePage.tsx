@@ -1,0 +1,1 @@
+export const CrmEventCreatePage = () => <div>CrmEventCreatePage</div>;

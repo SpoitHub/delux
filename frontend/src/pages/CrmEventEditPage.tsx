@@ -1,0 +1,1 @@
+export const CrmEventEditPage = () => <div>CrmEventEditPage</div>;
