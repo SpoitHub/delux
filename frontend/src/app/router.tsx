@@ -1,4 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom';
+import { MainLayout } from './layouts/MainLayout';
+import { OrganizerLayout } from './layouts/OrganizerLayout';
 import { HomePage } from '../pages/HomePage';
 import { EventsListPage } from '../pages/EventsListPage';
 import { EventDetailsPage } from '../pages/EventDetailsPage';
@@ -22,19 +24,26 @@ import { CrmOrderDetailsPage } from '../pages/CrmOrderDetailsPage';
 import { CrmCustomersPage } from '../pages/CrmCustomersPage';
 
 export const router = createBrowserRouter([
-  { path: '/', element: <HomePage /> },
-  { path: '/events', element: <EventsListPage /> },
-  { path: '/events/:id', element: <EventDetailsPage /> },
-  { path: '/shop', element: <ProductsListPage /> },
-  { path: '/products/:id', element: <ProductDetailsPage /> },
-  { path: '/cart', element: <CartPage /> },
-  { path: '/checkout', element: <CheckoutPage /> },
-  { path: '/payment/:orderId', element: <PaymentPage /> },
-  { path: '/orders/:id', element: <OrderDetailsPage /> },
-  { path: '/login', element: <LoginPage /> },
-  { path: '/register', element: <RegisterPage /> },
+  {
+    path: '/',
+    element: <MainLayout />,
+    children: [
+      { index: true, element: <HomePage /> },
+      { path: 'events', element: <EventsListPage /> },
+      { path: 'events/:id', element: <EventDetailsPage /> },
+      { path: 'shop', element: <ProductsListPage /> },
+      { path: 'products/:id', element: <ProductDetailsPage /> },
+      { path: 'cart', element: <CartPage /> },
+      { path: 'checkout', element: <CheckoutPage /> },
+      { path: 'payment/:orderId', element: <PaymentPage /> },
+      { path: 'orders/:id', element: <OrderDetailsPage /> },
+      { path: 'login', element: <LoginPage /> },
+      { path: 'register', element: <RegisterPage /> },
+    ],
+  },
   {
     path: '/crm',
+    element: <OrganizerLayout />,
     children: [
       { index: true, element: <CrmDashboardPage /> },
       { path: 'events', element: <CrmEventsPage /> },
