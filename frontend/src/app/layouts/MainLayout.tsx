@@ -22,11 +22,11 @@ export const MainLayout = () => {
             <div className="flex items-center">
               <Link to="/" className="flex items-center group">
                 <div className="w-10 h-10 mr-3 relative flex items-center justify-center">
-                  {/* Abstract S Logo representation */}
-                  <div className="absolute inset-0 bg-green-500 rounded-lg transform -skew-x-12 group-hover:shadow-[0_0_15px_rgba(57,255,20,0.6)] transition-all duration-300"></div>
-                  <div className="absolute inset-0 bg-black m-1 rounded-md transform -skew-x-12 flex items-center justify-center">
-                    <span className="text-green-500 font-black text-xl italic">S</span>
-                  </div>
+                  <img 
+                    src="/logo.png" 
+                    alt="SpoitHub Logo" 
+                    className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(57,255,20,0.5)] group-hover:drop-shadow-[0_0_15px_rgba(57,255,20,0.8)] transition-all duration-300" 
+                  />
                 </div>
                 <span className="text-3xl font-extrabold tracking-tighter text-white group-hover:text-green-400 transition-colors duration-300">
                   Spoit<span className="text-green-500">Hub</span>

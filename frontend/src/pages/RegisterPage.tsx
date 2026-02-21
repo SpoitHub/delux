@@ -10,7 +10,7 @@ export const RegisterPage = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       await api.post('/auth/register/', {
@@ -21,6 +21,7 @@ export const RegisterPage = () => {
       });
       navigate('/login');
     } catch (err) {
+      console.error('Registration failed:', err);
       setError('Initialization failed. Verify parameters.');
     }
   };

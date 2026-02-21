@@ -33,10 +33,10 @@ api.interceptors.response.use(
       } catch (refreshError) {
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
-        window.location.href = '/login';
-        return Promise.reject(refreshError);
+        globalThis.location.href = '/login';
+        throw refreshError;
       }
     }
-    return Promise.reject(error);
+    throw error;
   }
 );

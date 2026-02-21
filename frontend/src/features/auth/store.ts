@@ -42,6 +42,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       const response = await api.get('/auth/me/');
       set({ user: response.data, isAuthenticated: true, isLoading: false });
     } catch (error) {
+      console.error('Auth check failed:', error);
       set({ user: null, isAuthenticated: false, isLoading: false });
     }
   },

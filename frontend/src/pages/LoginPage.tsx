@@ -10,7 +10,7 @@ export const LoginPage = () => {
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       const response = await api.post('/auth/login/', { email, password });
@@ -18,6 +18,7 @@ export const LoginPage = () => {
       login(access, refresh, user);
       navigate('/');
     } catch (err) {
+      console.error('Login failed:', err);
       setError('Invalid credentials. Access denied.');
     }
   };
