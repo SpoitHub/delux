@@ -1,6 +1,17 @@
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, Link, Navigate } from 'react-router-dom';
+import { useAuthStore } from '../../features/auth/store';
 
 export const OrganizerLayout = () => {
+  const { user, isAuthenticated, isLoading } = useAuthStore();
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!isAuthenticated || !user?.is_organizer) {
+    return <Navigate to="/login" replace />;
+  }
+
   return (
     <div className="min-h-screen flex bg-gray-100">
       {/* Sidebar */}
@@ -25,7 +36,7 @@ export const OrganizerLayout = () => {
         <header className="h-16 bg-white shadow-sm flex items-center justify-between px-8">
           <h1 className="text-lg font-semibold text-gray-900">Organizer Dashboard</h1>
           <div className="flex items-center">
-            <span className="text-sm text-gray-500">Organizer Profile</span>
+            <span className="text-sm text-gray-500">{user.first_name || user.email}</span>
           </div>
         </header>
         <main className="flex-1 overflow-y-auto p-8">
