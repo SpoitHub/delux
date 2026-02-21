@@ -28,7 +28,7 @@ delux/
 
 ### 1) Клонировать
 ```bash
-git clone <YOUR_REPO_URL>
+git clone https://github.com/SpoitHub/delux
 cd delux
 ```
 
@@ -441,16 +441,48 @@ erDiagram
 
 ---
 
-## План MVP (чекпоинты)
+## 🗓️ 15-Week Development Roadmap
 
-1. **Infra**: Docker + Postgres + Django API + React skeleton  
-2. **Auth**: регистрация/логин + роль организатора + соц-логин (Google)  
-3. **Events**: CRUD событий + билеты + публичные страницы  
-4. **Market**: CRUD товаров + каталог  
-5. **Orders**: корзина + checkout + Order/OrderItem  
-6. **Payments**: mock payment → статус `paid`  
-7. **CRM**: dashboard + orders + customers notes + управление товарами/событиями  
-8. **Demo**: seed data, README, деплой (по необходимости)
+> **Goal:** Ship a full-featured SportHub marketplace — events, tickets, products, cart, payments and CRM — from scratch to live demo.
+
+| # | Theme | What to do | Key API / Artifact |
+|---|-------|------------|--------------------|
+| **1** | 📋 Planning | Roles, GitHub repo, ER-diagram, README | `docs/er_diagram.png` |
+| **2** | 🐳 Infra | `docker-compose` (Postgres + Django + React), `.env` | `GET /api/health/` |
+| **3** | 🗄️ DB + Models | Models: User, OrganizerProfile, Event, TicketType, Product, Category, Cart, Order, OrderItem, Payment + migrations | Django ORM, `makemigrations` |
+| **4** | 🔐 Auth — JWT | Register, login, refresh, `/auth/me/` | `POST /auth/register/` · `POST /auth/login/` · `GET /auth/me/` |
+| **5** | 👥 Auth — Roles + OAuth | OrganizerProfile, Google OAuth, guard `/crm/*` | `POST /auth/organizer/` · `POST /auth/token/refresh/` |
+| **6** | 🎟️ Events + Tickets | CRUD events (organizer), public list, tickets | `GET/POST /events/` · `GET /events/{id}/tickets/` · `PATCH /crm/events/{id}/` · `POST /crm/events/{id}/publish/` |
+| **7** | 🛍️ Products + Cart | CRUD products (organizer), catalog, add to cart | `GET/POST /products/` · `POST /cart/items/` · `PATCH /cart/items/{id}/` · `DELETE /cart/items/{id}/` |
+| **8** | 📦 Orders + Checkout | Cart → place order (Order + OrderItems from cart) | `GET /cart/` · `POST /orders/` · `GET /orders/{id}/` |
+| **9** | 💳 Payments | Mock charge → status `paid`, update Order | `POST /payments/mock/charge/` |
+| **10** | 📊 CRM — Events & Products | Manage organizer events and products | `GET/POST /crm/events/` · `GET/POST /crm/products/` · `GET /crm/dashboard/` |
+| **11** | 👤 CRM — Orders & Customers | Order list, status change, customer notes | `GET /crm/orders/` · `PATCH /crm/orders/{id}/` · `POST /crm/customers/{id}/notes/` |
+| **12** | ⚙️ CI/CD + Tests | GitHub Actions (lint + build + pytest), coverage ≥ 40% | `.github/workflows/ci.yml` |
+| **13** | 🔥 Load Testing | k6 scripts: 100 VU on `/events/`, checkout flow, `/auth/login/` | Report: RPS + p95 Latency |
+| **14** | 📈 Monitoring + Deploy | Prometheus + Grafana, `seed_db` (10 events, 50 products), `docker-compose.prod.yml` | `GET /metrics/` · Grafana dashboard |
+| **15** | 🎉 Demo Day | Live demo: register → order → pay → CRM | Swagger UI + k6 under load |
+
+---
+
+### Progress Tracker
+
+- [ ] Week 1 — Planning
+- [ ] Week 2 — Infra
+- [ ] Week 3 — DB + Models
+- [ ] Week 4 — Auth JWT
+- [ ] Week 5 — Auth Roles + OAuth
+- [ ] Week 6 — Events + Tickets
+- [ ] Week 7 — Products + Cart
+- [ ] Week 8 — Orders + Checkout
+- [ ] Week 9 — Payments
+- [ ] Week 10 — CRM Events & Products
+- [ ] Week 11 — CRM Orders & Customers
+- [ ] Week 12 — CI/CD + Tests
+- [ ] Week 13 — Load Testing
+- [ ] Week 14 — Monitoring + Deploy
+- [ ] Week 15 — Demo Day
+
 
 ---
 
