@@ -1,10 +1,16 @@
-import { Outlet, Link, Navigate, useLocation } from 'react-router-dom';
+import { Outlet, Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../features/auth/store';
 import { LayoutDashboard, Calendar, ShoppingBag, ShoppingCart, Users, LogOut, ArrowLeft } from 'lucide-react';
 
 export const OrganizerLayout = () => {
-  const { user, isAuthenticated, isLoading } = useAuthStore();
+  const { user, isAuthenticated, isLoading, logout } = useAuthStore();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   if (isLoading) {
     return (
@@ -71,6 +77,7 @@ export const OrganizerLayout = () => {
             Back to Site
           </Link>
           <button 
+            onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold tracking-widest uppercase text-red-400 hover:bg-red-500/10 hover:text-red-500 transition-all duration-300"
           >
             <LogOut size={16} />

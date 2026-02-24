@@ -1,7 +1,13 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Zap, Trophy, TrendingUp, Users } from 'lucide-react';
+import { ArrowRight, Zap, Trophy, TrendingUp, Users, Calendar, MapPin } from 'lucide-react';
+import { useEvents } from '../features/events/hooks';
+import { formatPrice, formatDate } from '../shared/lib/formatters';
+import { EventCardSkeleton } from '../shared/ui/Skeleton';
 
 export const HomePage = () => {
+  const { data: eventsData, isLoading: eventsLoading } = useEvents({ page: 1 });
+  const trendingEvents = eventsData?.results?.slice(0, 3) ?? [];
+
   return (
     <div className="flex flex-col w-full">
       {/* Hero Section */}
@@ -24,16 +30,16 @@ export const HomePage = () => {
           
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
             <Link 
-              to="/events/new" 
+              to="/events" 
               className="bg-[#39ff14] hover:bg-[#32e612] text-black font-bold uppercase tracking-widest text-xs px-8 py-4 rounded-full transition-all duration-300 text-center shadow-[0_0_20px_rgba(57,255,20,0.3)] hover:shadow-[0_0_30px_rgba(57,255,20,0.5)]"
             >
-              Create Event
+              Explore Events
             </Link>
             <Link 
-              to="/events" 
+              to="/shop" 
               className="bg-transparent border border-[#39ff14] text-[#39ff14] hover:bg-[#39ff14]/10 font-bold uppercase tracking-widest text-xs px-8 py-4 rounded-full transition-all duration-300 text-center"
             >
-              View Catalog
+              Visit Shop
             </Link>
           </div>
         </div>
@@ -51,7 +57,7 @@ export const HomePage = () => {
               </div>
               <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
             </div>
-            <div className="text-4xl font-black text-white mb-3">124</div>
+            <div className="text-4xl font-black text-white mb-3">{eventsData?.count ?? '—'}</div>
             <div className="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden">
               <div className="bg-[#39ff14] w-[70%] h-full rounded-full transition-all duration-1000"></div>
             </div>
@@ -86,7 +92,7 @@ export const HomePage = () => {
             </div>
           </div>
 
-          {/* Win Rate Card - NEW */}
+          {/* Success Rate Card */}
           <div className="col-span-2 bg-[#111] border border-white/5 rounded-2xl p-6 shadow-2xl hover:border-[#39ff14]/30 transition-all duration-300 group">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -99,8 +105,8 @@ export const HomePage = () => {
                 </div>
               </div>
               <div className="flex gap-1">
-                {[60, 80, 45, 90, 70, 95, 85].map((h, i) => (
-                  <div key={i} className="w-2 rounded-full bg-white/5 h-12 relative overflow-hidden">
+                {[60, 80, 45, 90, 70, 95, 85].map((h) => (
+                  <div key={`bar-${h}`} className="w-2 rounded-full bg-white/5 h-12 relative overflow-hidden">
                     <div 
                       className="absolute bottom-0 w-full bg-amber-400/60 rounded-full"
                       style={{ height: `${h}%` }}
@@ -125,11 +131,64 @@ export const HomePage = () => {
           </Link>
         </div>
         
-        {/* Placeholder for event cards */}
+        {/* Event cards from API */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-[#111] border border-white/5 rounded-2xl h-64 animate-pulse"></div>
-          ))}
+          {(() => {
+            if (eventsLoading) {
+              return [1, 2, 3].map((i) => <EventCardSkeleton key={i} />);
+            }
+            if (trendingEvents.length === 0) {
+              return (
+                <div className="col-span-3 text-center py-16">
+                  <p className="text-gray-500 text-sm">No events yet</p>
+                </div>
+              );
+            }
+            return trendingEvents.map((event) => {
+              const minPrice = event.ticket_types?.length
+                ? Math.min(...event.ticket_types.map((t) => t.price))
+                : 0;
+
+              return (
+                <Link
+                  key={event.id}
+                  to={`/events/${event.id}`}
+                  className="group bg-[#111] border border-white/5 rounded-2xl overflow-hidden hover:border-[#39ff14]/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(57,255,20,0.1)] flex flex-col"
+                >
+                  <div className="relative h-48 overflow-hidden">
+                    <div className="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-colors duration-500 z-10" />
+                    {event.image ? (
+                      <img src={event.image} alt={event.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-[#111] to-[#1a1a1a] flex items-center justify-center">
+                        <Calendar size={32} className="text-white/10" />
+                      </div>
+                    )}
+                    <div className="absolute top-4 right-4 z-20 bg-[#39ff14] text-black px-3 py-1 rounded-full font-black text-sm">
+                      {event.is_free ? 'Free' : formatPrice(minPrice)}
+                    </div>
+                  </div>
+                  <div className="p-5 flex-1 flex flex-col">
+                    <h3 className="text-lg font-black text-white mb-3 tracking-tight group-hover:text-[#39ff14] transition-colors line-clamp-2">
+                      {event.title}
+                    </h3>
+                    <div className="space-y-2 mt-auto">
+                      <div className="flex items-center text-gray-400 text-xs font-bold tracking-wider">
+                        <Calendar size={12} className="mr-2 text-[#39ff14]" />
+                        {formatDate(event.start_datetime)}
+                      </div>
+                      {event.location && (
+                        <div className="flex items-center text-gray-400 text-xs font-bold tracking-wider">
+                          <MapPin size={12} className="mr-2 text-[#39ff14]" />
+                          <span className="truncate">{event.location.city}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </Link>
+              );
+            });
+          })()}
         </div>
       </div>
     </div>

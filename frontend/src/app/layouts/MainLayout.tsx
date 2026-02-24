@@ -1,9 +1,11 @@
 import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../features/auth/store";
-import { Search, ShoppingBag } from "lucide-react";
+import { useCartStore } from "../../features/cart/store";
+import { ShoppingBag } from "lucide-react";
 
 export const MainLayout = () => {
   const { user, isAuthenticated, logout } = useAuthStore();
+  const cartItemsCount = useCartStore((s) => s.itemsCount);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -40,29 +42,27 @@ export const MainLayout = () => {
                 to="/shop"
                 className={`text-xs font-bold uppercase tracking-widest transition-colors duration-300 ${isActive("/shop") ? "text-[#39ff14] border-b-2 border-[#39ff14] pb-1" : "text-gray-300 hover:text-white"}`}
               >
-                Marketplace
+                Shop
               </Link>
               {isAuthenticated && user?.is_organizer && (
                 <Link
                   to="/crm"
                   className={`text-xs font-bold uppercase tracking-widest transition-colors duration-300 ${isActive("/crm") ? "text-[#39ff14] border-b-2 border-[#39ff14] pb-1" : "text-gray-300 hover:text-white"}`}
                 >
-                  Dashboard
+                  Panel
                 </Link>
               )}
             </nav>
 
             <div className="flex items-center space-x-6">
-              <button className="text-gray-300 hover:text-white transition-colors">
-                <Search size={20} />
-              </button>
               <Link
                 to="/cart"
                 className="text-gray-300 hover:text-white transition-colors relative"
               >
                 <ShoppingBag size={20} />
-                {/* Optional: Cart badge */}
-                {/* <span className="absolute -top-1 -right-1 bg-[#39ff14] text-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">2</span> */}
+                {cartItemsCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-[#39ff14] text-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">{cartItemsCount > 9 ? '9+' : cartItemsCount}</span>
+                )}
               </Link>
 
               {isAuthenticated ? (
