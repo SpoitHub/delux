@@ -32,9 +32,7 @@ export const OrganizerLayout = () => {
       <div className="w-64 bg-[#111] border-r border-white/5 flex flex-col">
         <div className="h-20 flex items-center px-8 border-b border-white/5">
           <Link to="/crm" className="flex items-center gap-3 group">
-            <div className="w-8 h-8 bg-[#39ff14] rounded-sm flex items-center justify-center transform -skew-x-12 group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(57,255,20,0.3)]">
-              <span className="text-black font-black text-xl italic">S</span>
-            </div>
+            <img src="/logo.png" alt="SpoitHub Logo" className="w-8 h-8 rounded-sm object-contain transform group-hover:scale-110 transition-transform" />
             <span className="text-xl font-black tracking-tighter">
               SPOIT<span className="text-[#39ff14]">HUB</span>
               <span className="block text-[8px] text-gray-500 tracking-widest uppercase mt-0.5">Organizer</span>

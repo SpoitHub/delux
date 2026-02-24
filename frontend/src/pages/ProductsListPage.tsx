@@ -50,7 +50,7 @@ export const ProductsListPage = () => {
   return (
     <div className="flex flex-col w-full min-h-screen pb-24">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6 mt-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
         <div>
           <h1 className="text-5xl md:text-6xl font-black tracking-tighter leading-none">
             <span className="text-white block">PREMIUM</span>

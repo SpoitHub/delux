@@ -24,7 +24,8 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-20 p-8 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.5)] relative overflow-hidden">
+    <div className="min-h-[calc(100vh-12rem)] flex items-center justify-center">
+    <div className="w-full max-w-md p-8 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.5)] relative overflow-hidden">
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-500 to-emerald-600"></div>
       <h2 className="text-3xl font-extrabold mb-8 text-center tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">SYSTEM LOGIN</h2>
       
@@ -76,6 +77,7 @@ export const LoginPage = () => {
           No access code? <Link to="/register" className="text-green-400 hover:text-green-300 transition-colors">Initialize profile</Link>
         </p>
       </div>
+    </div>
     </div>
   );
 };
