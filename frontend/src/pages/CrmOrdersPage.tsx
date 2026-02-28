@@ -1,12 +1,13 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Search, Eye, Download, Filter } from 'lucide-react';
 
 const MOCK_ORDERS = [
-  { id: 'ORD-1042', customer: 'Alex Johnson', email: 'alex.j@example.com', items: '2x Pro Elite Jersey', total: '$240.00', status: 'Completed', date: 'Oct 24, 2024 14:30' },
-  { id: 'ORD-1043', customer: 'Sarah Smith', email: 'sarah.s@example.com', items: '1x UFC 300 VIP Ticket', total: '$800.00', status: 'Processing', date: 'Oct 24, 2024 15:45' },
-  { id: 'ORD-1044', customer: 'Mike Brown', email: 'mike.b@example.com', items: '1x Carbon Cleats', total: '$250.00', status: 'Completed', date: 'Oct 24, 2024 16:10' },
-  { id: 'ORD-1045', customer: 'Emma Davis', email: 'emma.d@example.com', items: '2x NBA Finals Ticket', total: '$2400.00', status: 'Pending', date: 'Oct 24, 2024 17:20' },
-  { id: 'ORD-1046', customer: 'James Wilson', email: 'james.w@example.com', items: '1x Performance Hoodie', total: '$85.00', status: 'Cancelled', date: 'Oct 24, 2024 18:05' },
+  { id: 1042, customer: 'Alex Johnson', email: 'alex.j@example.com', items: '2x Pro Elite Jersey', total: '$240.00', status: 'Completed', date: 'Oct 24, 2024 14:30' },
+  { id: 1043, customer: 'Sarah Smith', email: 'sarah.s@example.com', items: '1x UFC 300 VIP Ticket', total: '$800.00', status: 'Processing', date: 'Oct 24, 2024 15:45' },
+  { id: 1044, customer: 'Mike Brown', email: 'mike.b@example.com', items: '1x Carbon Cleats', total: '$250.00', status: 'Completed', date: 'Oct 24, 2024 16:10' },
+  { id: 1045, customer: 'Emma Davis', email: 'emma.d@example.com', items: '2x NBA Finals Ticket', total: '$2400.00', status: 'Pending', date: 'Oct 24, 2024 17:20' },
+  { id: 1046, customer: 'James Wilson', email: 'james.w@example.com', items: '1x Performance Hoodie', total: '$85.00', status: 'Cancelled', date: 'Oct 24, 2024 18:05' },
 ];
 
 export const CrmOrdersPage = () => {
@@ -71,7 +72,7 @@ export const CrmOrdersPage = () => {
               {MOCK_ORDERS.map((order) => (
                 <tr key={order.id} className="border-b border-white/5 hover:bg-white/5 transition-colors group">
                   <td className="p-4">
-                    <div className="text-white text-sm font-bold mb-1">{order.id}</div>
+                    <div className="text-white text-sm font-bold mb-1">ORD-{order.id}</div>
                     <div className="text-gray-500 text-[10px] font-bold tracking-widest uppercase">{order.date}</div>
                   </td>
                   <td className="p-4">
@@ -96,9 +97,9 @@ export const CrmOrdersPage = () => {
                   </td>
                   <td className="p-4 text-right">
                     <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="p-2 text-gray-400 hover:text-[#39ff14] hover:bg-[#39ff14]/10 rounded-lg transition-colors">
+                      <Link to={`/crm/orders/${order.id}`} className="p-2 text-gray-400 hover:text-[#39ff14] hover:bg-[#39ff14]/10 rounded-lg transition-colors" title="View order">
                         <Eye size={16} />
-                      </button>
+                      </Link>
                     </div>
                   </td>
                 </tr>

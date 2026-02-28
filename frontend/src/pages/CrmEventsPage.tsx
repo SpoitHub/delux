@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { Search, Plus, MoreVertical, Edit, Trash2, Eye } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const MOCK_EVENTS = [
-  { id: 'EVT-001', title: 'Champions League Final', date: '28 May 2024', location: 'Wembley Stadium', status: 'Active', ticketsSold: 85000, revenue: '$4.2M' },
-  { id: 'EVT-002', title: 'UFC 300', date: '13 Apr 2024', location: 'T-Mobile Arena', status: 'Active', ticketsSold: 18000, revenue: '$2.1M' },
-  { id: 'EVT-003', title: 'NBA Finals Game 7', date: '20 Jun 2024', location: 'TD Garden', status: 'Draft', ticketsSold: 0, revenue: '$0' },
-  { id: 'EVT-004', title: 'Wimbledon Men\'s Final', date: '14 Jul 2024', location: 'All England Club', status: 'Completed', ticketsSold: 15000, revenue: '$1.5M' },
+  { id: 1, title: 'Champions League Final', date: '28 May 2024', location: 'Wembley Stadium', status: 'Active', ticketsSold: 85000, revenue: '$4.2M' },
+  { id: 2, title: 'UFC 300', date: '13 Apr 2024', location: 'T-Mobile Arena', status: 'Active', ticketsSold: 18000, revenue: '$2.1M' },
+  { id: 3, title: 'NBA Finals Game 7', date: '20 Jun 2024', location: 'TD Garden', status: 'Draft', ticketsSold: 0, revenue: '$0' },
+  { id: 4, title: "Wimbledon Men's Final", date: '14 Jul 2024', location: 'All England Club', status: 'Completed', ticketsSold: 15000, revenue: '$1.5M' },
 ];
 
 export const CrmEventsPage = () => {
@@ -68,7 +68,7 @@ export const CrmEventsPage = () => {
             <tbody>
               {MOCK_EVENTS.map((event) => (
                 <tr key={event.id} className="border-b border-white/5 hover:bg-white/5 transition-colors group">
-                  <td className="p-4 text-gray-500 text-xs font-bold tracking-widest uppercase">{event.id}</td>
+                  <td className="p-4 text-gray-500 text-xs font-bold tracking-widest uppercase">EVT-{String(event.id).padStart(3, '0')}</td>
                   <td className="p-4">
                     <div className="text-white text-sm font-bold">{event.title}</div>
                   </td>
@@ -91,13 +91,13 @@ export const CrmEventsPage = () => {
                   </td>
                   <td className="p-4 text-right">
                     <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+                      <Link to={`/events/${event.id}`} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="View public page">
                         <Eye size={16} />
-                      </button>
-                      <button className="p-2 text-gray-400 hover:text-[#39ff14] hover:bg-[#39ff14]/10 rounded-lg transition-colors">
+                      </Link>
+                      <Link to={`/crm/events/${event.id}/edit`} className="p-2 text-gray-400 hover:text-[#39ff14] hover:bg-[#39ff14]/10 rounded-lg transition-colors" title="Edit event">
                         <Edit size={16} />
-                      </button>
-                      <button className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors">
+                      </Link>
+                      <button className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors" title="Delete event">
                         <Trash2 size={16} />
                       </button>
                     </div>

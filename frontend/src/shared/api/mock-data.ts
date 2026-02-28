@@ -485,6 +485,79 @@ export function getMockProduct(id: number | string): Product | undefined {
   return MOCK_PRODUCTS.find((p) => p.id === Number(id));
 }
 
+// ── Seeded Orders (for CRM demo display) ──
+
+export const SEEDED_ORDERS: Order[] = [
+  {
+    id: 1042,
+    status: 'delivered',
+    payment_status: 'paid',
+    delivery_type: 'delivery',
+    contact: { name: 'Alex Johnson', phone: '+1 555 0001' },
+    shipping_address: { city: 'New York', address_line: '123 Main St', postal_code: '10001' },
+    items: [
+      { id: 1, item_type: 'product', product: MOCK_PRODUCTS[0], quantity: 2, unit_price: MOCK_PRODUCTS[0].price, total_price: MOCK_PRODUCTS[0].price * 2 },
+    ],
+    total: MOCK_PRODUCTS[0].price * 2,
+    created_at: future(-10),
+    updated_at: future(-10),
+  },
+  {
+    id: 1043,
+    status: 'processing',
+    payment_status: 'paid',
+    delivery_type: 'pickup',
+    contact: { name: 'Sarah Smith', phone: '+1 555 0002' },
+    items: [
+      { id: 2, item_type: 'ticket', event: MOCK_EVENTS[1], ticket_type: MOCK_EVENTS[1].ticket_types[0], quantity: 1, unit_price: MOCK_EVENTS[1].ticket_types[0].price, total_price: MOCK_EVENTS[1].ticket_types[0].price },
+    ],
+    total: MOCK_EVENTS[1].ticket_types[0].price,
+    created_at: future(-9),
+    updated_at: future(-9),
+  },
+  {
+    id: 1044,
+    status: 'delivered',
+    payment_status: 'paid',
+    delivery_type: 'delivery',
+    contact: { name: 'Mike Brown', phone: '+1 555 0003' },
+    shipping_address: { city: 'Los Angeles', address_line: '456 Oak Ave', postal_code: '90001' },
+    items: [
+      { id: 3, item_type: 'product', product: MOCK_PRODUCTS[2], quantity: 1, unit_price: MOCK_PRODUCTS[2].price, total_price: MOCK_PRODUCTS[2].price },
+    ],
+    total: MOCK_PRODUCTS[2].price,
+    created_at: future(-8),
+    updated_at: future(-8),
+  },
+  {
+    id: 1045,
+    status: 'pending',
+    payment_status: 'pending',
+    delivery_type: 'none',
+    contact: { name: 'Emma Davis', phone: '+1 555 0004' },
+    items: [
+      { id: 4, item_type: 'ticket', event: MOCK_EVENTS[0], ticket_type: MOCK_EVENTS[0].ticket_types[3], quantity: 2, unit_price: MOCK_EVENTS[0].ticket_types[3].price, total_price: MOCK_EVENTS[0].ticket_types[3].price * 2 },
+    ],
+    total: MOCK_EVENTS[0].ticket_types[3].price * 2,
+    created_at: future(-7),
+    updated_at: future(-7),
+  },
+  {
+    id: 1046,
+    status: 'cancelled',
+    payment_status: 'refunded',
+    delivery_type: 'delivery',
+    contact: { name: 'James Wilson', phone: '+1 555 0005' },
+    shipping_address: { city: 'Chicago', address_line: '789 Pine Rd', postal_code: '60601' },
+    items: [
+      { id: 5, item_type: 'product', product: MOCK_PRODUCTS[1], quantity: 1, unit_price: MOCK_PRODUCTS[1].price, total_price: MOCK_PRODUCTS[1].price },
+    ],
+    total: MOCK_PRODUCTS[1].price,
+    created_at: future(-6),
+    updated_at: future(-6),
+  },
+];
+
 // ── Mock cart (in-memory) ──
 
 let mockCartIdCounter = 1;
@@ -608,7 +681,7 @@ export function createMockOrder(payload: {
 }
 
 export function getMockOrder(id: number | string): Order | undefined {
-  return mockOrders.find((o) => o.id === Number(id));
+  return mockOrders.find((o) => o.id === Number(id)) ?? SEEDED_ORDERS.find((o) => o.id === Number(id));
 }
 
 // ── Mock Auth ──

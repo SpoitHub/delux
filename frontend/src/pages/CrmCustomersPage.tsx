@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Search, Download, Mail, User } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Search, Download, Mail, User, Eye } from 'lucide-react';
 
 const MOCK_CUSTOMERS = [
   { id: 1, name: 'Alex Johnson', email: 'alex.j@example.com', orders: 12, totalSpent: '$3,420', joined: 'Jan 2024', lastOrder: 'Oct 24, 2024' },
@@ -109,6 +110,9 @@ export const CrmCustomersPage = () => {
                   </td>
                   <td className="p-4 text-right">
                     <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Link to="/crm/orders" className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="View orders">
+                        <Eye size={16} />
+                      </Link>
                       <button className="p-2 text-gray-400 hover:text-[#39ff14] hover:bg-[#39ff14]/10 rounded-lg transition-colors" title="Send email">
                         <Mail size={16} />
                       </button>

@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { Users, Calendar, ShoppingBag, DollarSign, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
 const STATS = [
@@ -32,10 +33,10 @@ const STATS = [
 ];
 
 const RECENT_ORDERS = [
-  { id: '#ORD-001', customer: 'Alex Johnson', product: 'Pro Elite Jersey', amount: '$120', status: 'Completed', date: '2 mins ago' },
-  { id: '#ORD-002', customer: 'Sarah Smith', product: 'UFC 300 Ticket', amount: '$800', status: 'Processing', date: '15 mins ago' },
-  { id: '#ORD-003', customer: 'Mike Brown', product: 'Carbon Cleats', amount: '$250', status: 'Completed', date: '1 hour ago' },
-  { id: '#ORD-004', customer: 'Emma Davis', product: 'NBA Finals Ticket', amount: '$1200', status: 'Pending', date: '2 hours ago' },
+  { id: '#ORD-001', orderId: 1042, customer: 'Alex Johnson', product: 'Pro Elite Jersey', amount: '$120', status: 'Completed', date: '2 mins ago' },
+  { id: '#ORD-002', orderId: 1043, customer: 'Sarah Smith', product: 'UFC 300 Ticket', amount: '$800', status: 'Processing', date: '15 mins ago' },
+  { id: '#ORD-003', orderId: 1044, customer: 'Mike Brown', product: 'Carbon Cleats', amount: '$250', status: 'Completed', date: '1 hour ago' },
+  { id: '#ORD-004', orderId: 1045, customer: 'Emma Davis', product: 'NBA Finals Ticket', amount: '$1200', status: 'Pending', date: '2 hours ago' },
 ];
 
 export const CrmDashboardPage = () => {
@@ -112,11 +113,11 @@ export const CrmDashboardPage = () => {
         <div className="bg-[#111] border border-white/5 rounded-2xl p-6">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-white text-sm font-bold tracking-widest uppercase">Recent Orders</h3>
-            <button className="text-[#39ff14] text-xs font-bold tracking-widest uppercase hover:underline">View All</button>
+            <Link to="/crm/orders" className="text-[#39ff14] text-xs font-bold tracking-widest uppercase hover:underline">View All</Link>
           </div>
           <div className="space-y-4">
             {RECENT_ORDERS.map((order, i) => (
-              <div key={i} className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors border border-transparent hover:border-white/10">
+              <Link key={i} to={`/crm/orders/${order.orderId}`} className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors border border-transparent hover:border-white/10">
                 <div>
                   <div className="text-white text-sm font-bold mb-1">{order.customer}</div>
                   <div className="text-gray-500 text-[10px] font-bold tracking-widest uppercase">{order.product}</div>
@@ -125,7 +126,7 @@ export const CrmDashboardPage = () => {
                   <div className="text-[#39ff14] text-sm font-black mb-1">{order.amount}</div>
                   <div className="text-gray-500 text-[10px] font-bold tracking-widest uppercase">{order.date}</div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>

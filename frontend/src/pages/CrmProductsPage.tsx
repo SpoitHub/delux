@@ -3,10 +3,10 @@ import { Search, Plus, Edit, Trash2, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const MOCK_PRODUCTS = [
-  { id: 'PRD-001', name: 'Pro Elite Jersey', category: 'Apparel', price: '$120', stock: 450, status: 'In Stock', sales: 1240 },
-  { id: 'PRD-002', name: 'Carbon Fiber Cleats', category: 'Footwear', price: '$250', stock: 12, status: 'Low Stock', sales: 850 },
-  { id: 'PRD-003', name: 'Performance Hoodie', category: 'Apparel', price: '$85', stock: 0, status: 'Out of Stock', sales: 2100 },
-  { id: 'PRD-004', name: 'Smart Tracker Watch', category: 'Accessories', price: '$300', stock: 85, status: 'In Stock', sales: 420 },
+  { id: 1, name: 'Pro Elite Jersey', category: 'Apparel', price: '$120', stock: 450, status: 'In Stock', sales: 1240 },
+  { id: 2, name: 'Carbon Fiber Cleats', category: 'Footwear', price: '$250', stock: 12, status: 'Low Stock', sales: 850 },
+  { id: 3, name: 'Performance Hoodie', category: 'Apparel', price: '$85', stock: 0, status: 'Out of Stock', sales: 2100 },
+  { id: 4, name: 'Smart Tracker Watch', category: 'Accessories', price: '$300', stock: 85, status: 'In Stock', sales: 420 },
 ];
 
 export const CrmProductsPage = () => {
@@ -74,7 +74,7 @@ export const CrmProductsPage = () => {
             <tbody>
               {MOCK_PRODUCTS.map((product) => (
                 <tr key={product.id} className="border-b border-white/5 hover:bg-white/5 transition-colors group">
-                  <td className="p-4 text-gray-500 text-xs font-bold tracking-widest uppercase">{product.id}</td>
+                  <td className="p-4 text-gray-500 text-xs font-bold tracking-widest uppercase">PRD-{String(product.id).padStart(3, '0')}</td>
                   <td className="p-4">
                     <div className="text-white text-sm font-bold">{product.name}</div>
                     <div className="text-gray-500 text-[10px] font-bold tracking-widest uppercase">{product.category}</div>
@@ -101,13 +101,13 @@ export const CrmProductsPage = () => {
                   </td>
                   <td className="p-4 text-right">
                     <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+                      <Link to={`/products/${product.id}`} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="View public page">
                         <Eye size={16} />
-                      </button>
-                      <button className="p-2 text-gray-400 hover:text-[#39ff14] hover:bg-[#39ff14]/10 rounded-lg transition-colors">
+                      </Link>
+                      <Link to={`/crm/products/${product.id}/edit`} className="p-2 text-gray-400 hover:text-[#39ff14] hover:bg-[#39ff14]/10 rounded-lg transition-colors" title="Edit product">
                         <Edit size={16} />
-                      </button>
-                      <button className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors">
+                      </Link>
+                      <button className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors" title="Delete product">
                         <Trash2 size={16} />
                       </button>
                     </div>

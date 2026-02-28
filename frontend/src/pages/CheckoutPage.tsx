@@ -103,7 +103,7 @@ export const CheckoutPage = () => {
     createOrder.mutate(payload, {
       onSuccess: (order) => {
         toast('Order created successfully!', 'success');
-        navigate(`/orders/${order.id}`);
+        navigate(`/payment/${order.id}`);
       },
       onError: () => {
         toast('Failed to create order. Please try again.', 'error');
