@@ -15,11 +15,11 @@ services:
   backend:
     build: ./backend
     container_name: delux_backend
-    command: python manage.py runserver 0.0.0.0:8888
+    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./backend:/app
     ports:
-      - "8888:8888"
+      - "8000:8000"
     depends_on:
       - db
     env_file:
