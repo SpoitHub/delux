@@ -25,5 +25,18 @@ services:
     env_file:
       - .env
 
+  frontend:
+    build: ./frontend
+    container_name: delux_frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://localhost:8000/api/v1
+
 volumes:
   postgres_data:
