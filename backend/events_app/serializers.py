@@ -79,16 +79,30 @@ class EventWriteSerializer(serializers.ModelSerializer):
         """
         When the request comes as multipart/form-data (file upload),
         nested objects arrive as JSON strings — parse them here.
+
+        IMPORTANT: we must convert to a plain dict (not QueryDict) before
+        calling super(), otherwise DRF's ListSerializer.get_value() detects
+        the QueryDict via hasattr(data, 'getlist') and uses parse_html_list()
+        which expects keys like 'ticket_types[0]name' instead of a Python list,
+        causing ticket_types to always be treated as empty.
         """
-        mutable = data.copy() if hasattr(data, 'copy') else dict(data)
+        # Flatten to a plain dict so DRF uses dict.get() for every field,
+        # including the many=True ticket_types serializer.
+        if hasattr(data, 'getlist'):
+            # QueryDict / DataAndFiles — dict(data.items()) picks last value per key
+            plain: dict = dict(data.items())
+        else:
+            plain = dict(data)
+
+        # Parse JSON-encoded nested fields sent as strings via FormData
         for field in ('location', 'online_info', 'ticket_types'):
-            val = mutable.get(field)
+            val = plain.get(field)
             if isinstance(val, str):
                 try:
-                    mutable[field] = json.loads(val)
+                    plain[field] = json.loads(val)
                 except (ValueError, TypeError):
                     pass
-        return super().to_internal_value(mutable)
+        return super().to_internal_value(plain)
 
     # ── create ──────────────────────────────────────────────────────────────
 
