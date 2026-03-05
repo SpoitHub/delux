@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { mockRegister, mockLogin } from '../shared/api/mock-data';
+import { apiRegister, apiLogin } from '../shared/api/auth';
 import { useAuthStore } from '../features/auth/store';
 
 export const RegisterPage = () => {
@@ -12,13 +12,13 @@ export const RegisterPage = () => {
   const navigate = useNavigate();
   const login = useAuthStore((s) => s.login);
 
-  const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
     try {
-      mockRegister({ email, password, first_name: firstName, last_name: lastName });
+      await apiRegister({ email, password, first_name: firstName, last_name: lastName });
       // Авто-вход после регистрации
-      const { access, refresh, user } = mockLogin(email, password);
+      const { access, refresh, user } = await apiLogin(email, password);
       login(access, refresh, user);
       navigate('/');
     } catch (err) {

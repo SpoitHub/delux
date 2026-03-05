@@ -11,6 +11,7 @@ import { CartPage } from '../pages/CartPage';
 import { CheckoutPage } from '../pages/CheckoutPage';
 import { PaymentPage } from '../pages/PaymentPage';
 import { OrderDetailsPage } from '../pages/OrderDetailsPage';
+import { OrdersListPage } from '../pages/OrdersListPage';
 import { LoginPage } from '../pages/LoginPage';
 import { RegisterPage } from '../pages/RegisterPage';
 import { ProfilePage } from '../pages/ProfilePage';
@@ -45,6 +46,7 @@ export const router = createBrowserRouter([
           { path: 'cart', element: <CartPage /> },
           { path: 'checkout', element: <CheckoutPage /> },
           { path: 'payment/:orderId', element: <PaymentPage /> },
+          { path: 'orders', element: <OrdersListPage /> },
           { path: 'orders/:id', element: <OrderDetailsPage /> },
           { path: 'profile', element: <ProfilePage /> },
         ],

@@ -1,16 +1,19 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, CreditCard, Shield, CheckCircle, Lock } from 'lucide-react';
-import { getMockOrder } from '../shared/api/mock-data';
+import { useOrder } from '../features/orders/hooks';
 import { formatPrice } from '../shared/lib/formatters';
 import { useToast } from '../shared/ui/toast-context';
+import { PageSpinner } from '../shared/ui/Spinner';
 
 export const PaymentPage = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const { toast } = useToast();
-  const order = getMockOrder(orderId ?? '');
+  const { data: order, isLoading } = useOrder(orderId ?? '');
   const [processing, setProcessing] = useState(false);
   const [paid, setPaid] = useState(false);
+
+  if (isLoading) return <PageSpinner />;
 
   if (!order) {
     return (

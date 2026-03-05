@@ -23,6 +23,7 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=150, blank=True)
     last_name = models.CharField(max_length=150, blank=True)
+    phone = models.CharField(max_length=30, blank=True)
     is_organizer = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'email'

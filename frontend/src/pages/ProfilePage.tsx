@@ -30,11 +30,11 @@ export const ProfilePage = () => {
 
   if (!user) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     try {
-      updateProfile({ first_name: firstName, last_name: lastName, phone });
+      await updateProfile({ first_name: firstName, last_name: lastName, phone });
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {

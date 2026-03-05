@@ -26,8 +26,8 @@ export const MainLayout = () => {
   // Закрыть при смене маршрута
   useEffect(() => { setDropdownOpen(false); }, [location.pathname]);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate("/");
   };
 

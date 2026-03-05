@@ -716,6 +716,10 @@ export function getMockOrder(userId: number, id: number | string): Order | undef
   return loadOrders(userId).find((o) => o.id === Number(id));
 }
 
+export function getMockOrders(userId: number): Order[] {
+  return loadOrders(userId).slice().reverse(); // новые сверху
+}
+
 // ── Mock Auth (user registry in localStorage) ──
 
 interface StoredUser {

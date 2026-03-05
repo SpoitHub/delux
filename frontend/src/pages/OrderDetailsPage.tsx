@@ -26,9 +26,9 @@ export const OrderDetailsPage = () => {
   return (
     <div className="flex flex-col w-full pb-24">
       {/* Back */}
-      <Link to="/" className="flex items-center gap-2 text-gray-400 hover:text-white text-xs font-bold tracking-widest uppercase mb-8 transition-colors w-fit">
+      <Link to="/orders" className="flex items-center gap-2 text-gray-400 hover:text-white text-xs font-bold tracking-widest uppercase mb-8 transition-colors w-fit">
         <ArrowLeft size={14} />
-        Go Home
+        My Orders
       </Link>
 
       {/* Header */}
