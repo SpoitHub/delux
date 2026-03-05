@@ -1,18 +1,52 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Save, Calendar, MapPin, Globe, Image, Trash2 } from 'lucide-react';
+import { ArrowLeft, Save, Calendar, MapPin, Globe, Image, Trash2, AlertTriangle } from 'lucide-react';
 import { useToast } from '../shared/ui/toast-context';
-import { getMockEvent } from '../shared/api/mock-data';
+import { useCrmEvent, useUpdateCrmEvent, useDeleteCrmEvent } from '../features/crm/hooks';
 
 export const CrmEventEditPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const event = getMockEvent(id ?? '');
+  const { data: event, isLoading, error } = useCrmEvent(id ?? '');
+  const updateEvent = useUpdateCrmEvent(id ?? '');
+  const deleteEvent = useDeleteCrmEvent();
 
-  const [format, setFormat] = useState<'offline' | 'online'>(event?.format ?? 'offline');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  if (!event) {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [startDatetime, setStartDatetime] = useState('');
+  const [endDatetime, setEndDatetime] = useState('');
+  const [format, setFormat] = useState<'offline' | 'online'>('offline');
+  const [city, setCity] = useState('');
+  const [address, setAddress] = useState('');
+  const [streamUrl, setStreamUrl] = useState('');
+  const [streamPlatform, setStreamPlatform] = useState('');
+  const [isFree, setIsFree] = useState(false);
+  const [eventStatus, setEventStatus] = useState<'draft' | 'published' | 'cancelled' | 'completed'>('draft');
+
+  useEffect(() => {
+    if (event) {
+      setTitle(event.title);
+      setDescription(event.description);
+      setStartDatetime(event.start_datetime.slice(0, 16));
+      setEndDatetime(event.end_datetime.slice(0, 16));
+      setFormat(event.format);
+      setCity(event.location?.city ?? '');
+      setAddress(event.location?.address ?? '');
+      setStreamUrl(event.online_info?.url ?? '');
+      setStreamPlatform(event.online_info?.platform ?? '');
+      setIsFree(event.is_free);
+      setEventStatus(event.status);
+    }
+  }, [event]);
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center py-24 text-gray-500 text-sm">Loading event...</div>;
+  }
+
+  if (error || !event) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
         <h2 className="text-2xl font-black text-white mb-2">Event Not Found</h2>
@@ -24,15 +58,35 @@ export const CrmEventEditPage = () => {
     );
   }
 
-  const handleSubmit = (e: globalThis.Event | { preventDefault: () => void }) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast('Event updated successfully!', 'success');
-    navigate('/crm/events');
+    try {
+      await updateEvent.mutateAsync({
+        title,
+        description,
+        format,
+        start_datetime: new Date(startDatetime).toISOString(),
+        end_datetime: new Date(endDatetime).toISOString(),
+        is_free: isFree,
+        status: eventStatus,
+        location: format === 'offline' ? { city, address } : null,
+        online_info: format === 'online' && streamUrl ? { url: streamUrl, platform: streamPlatform } : null,
+      });
+      toast('Event updated successfully!', 'success');
+      navigate('/crm/events');
+    } catch (err) {
+      toast(err instanceof Error ? err.message : 'Failed to update event', 'error');
+    }
   };
 
-  const handleDelete = () => {
-    toast('Event deleted.', 'success');
-    navigate('/crm/events');
+  const handleDelete = async () => {
+    try {
+      await deleteEvent.mutateAsync(id ?? '');
+      toast('Event deleted.', 'success');
+      navigate('/crm/events');
+    } catch (err) {
+      toast(err instanceof Error ? err.message : 'Failed to delete event', 'error');
+    }
   };
 
   const inputClass =
@@ -55,13 +109,52 @@ export const CrmEventEditPage = () => {
         </div>
         <button
           type="button"
-          onClick={handleDelete}
+          onClick={() => setShowDeleteModal(true)}
           className="bg-red-500/10 text-red-500 border border-red-500/20 px-5 py-3 rounded-xl text-xs font-bold tracking-widest uppercase hover:bg-red-500/20 transition-colors flex items-center gap-2"
         >
           <Trash2 size={14} />
           Delete Event
         </button>
       </div>
+
+      {/* Delete confirmation modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="bg-[#111] border border-white/10 rounded-2xl p-8 max-w-sm w-full space-y-5 shadow-2xl">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-red-500/15 flex items-center justify-center flex-shrink-0">
+                <AlertTriangle size={20} className="text-red-400" />
+              </div>
+              <div>
+                <h3 className="text-white font-black text-lg tracking-tight">Delete Event?</h3>
+                <p className="text-gray-400 text-xs mt-0.5">This action cannot be undone.</p>
+              </div>
+            </div>
+            <p className="text-gray-300 text-sm">
+              You are about to permanently delete <span className="text-white font-bold">&ldquo;{event.title}&rdquo;</span>.
+              All ticket types and data will be removed.
+            </p>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowDeleteModal(false)}
+                className="flex-1 py-3 border border-white/10 rounded-xl text-gray-400 text-xs font-bold tracking-widest uppercase hover:bg-white/5 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={deleteEvent.isPending}
+                className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl text-xs font-bold tracking-widest uppercase transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                <Trash2 size={13} />
+                {deleteEvent.isPending ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Form */}
@@ -74,20 +167,20 @@ export const CrmEventEditPage = () => {
             </h2>
             <div>
               <label htmlFor="event-title" className={labelClass}>Event Title</label>
-              <input id="event-title" type="text" defaultValue={event.title} className={inputClass} required />
+              <input id="event-title" type="text" className={inputClass} required value={title} onChange={(e) => setTitle(e.target.value)} />
             </div>
             <div>
               <label htmlFor="event-description" className={labelClass}>Description</label>
-              <textarea id="event-description" rows={5} defaultValue={event.description} className={inputClass + ' resize-none'} required />
+              <textarea id="event-description" rows={5} className={inputClass + ' resize-none'} required value={description} onChange={(e) => setDescription(e.target.value)} />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="start-datetime" className={labelClass}>Start Date & Time</label>
-                <input id="start-datetime" type="datetime-local" defaultValue={event.start_datetime.slice(0, 16)} className={inputClass} required />
+                <input id="start-datetime" type="datetime-local" className={inputClass} required value={startDatetime} onChange={(e) => setStartDatetime(e.target.value)} />
               </div>
               <div>
                 <label htmlFor="end-datetime" className={labelClass}>End Date & Time</label>
-                <input id="end-datetime" type="datetime-local" defaultValue={event.end_datetime.slice(0, 16)} className={inputClass} required />
+                <input id="end-datetime" type="datetime-local" className={inputClass} required value={endDatetime} onChange={(e) => setEndDatetime(e.target.value)} />
               </div>
             </div>
           </div>
@@ -118,22 +211,22 @@ export const CrmEventEditPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="event-city" className={labelClass}>City</label>
-                  <input id="event-city" type="text" defaultValue={event.location?.city ?? ''} className={inputClass} />
+                  <input id="event-city" type="text" className={inputClass} value={city} onChange={(e) => setCity(e.target.value)} />
                 </div>
                 <div>
                   <label htmlFor="event-address" className={labelClass}>Address</label>
-                  <input id="event-address" type="text" defaultValue={event.location?.address ?? ''} className={inputClass} />
+                  <input id="event-address" type="text" className={inputClass} value={address} onChange={(e) => setAddress(e.target.value)} />
                 </div>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="stream-url" className={labelClass}>Stream URL</label>
-                  <input id="stream-url" type="url" defaultValue={event.online_info?.url ?? ''} className={inputClass} />
+                  <input id="stream-url" type="url" className={inputClass} value={streamUrl} onChange={(e) => setStreamUrl(e.target.value)} />
                 </div>
                 <div>
                   <label htmlFor="stream-platform" className={labelClass}>Platform</label>
-                  <input id="stream-platform" type="text" defaultValue={event.online_info?.platform ?? ''} className={inputClass} />
+                  <input id="stream-platform" type="text" className={inputClass} value={streamPlatform} onChange={(e) => setStreamPlatform(e.target.value)} />
                 </div>
               </div>
             )}
@@ -192,7 +285,7 @@ export const CrmEventEditPage = () => {
           {/* Status */}
           <div className="bg-[#111] border border-white/5 rounded-2xl p-6">
             <h3 className="text-white text-sm font-bold tracking-widest uppercase mb-4">Status</h3>
-            <select defaultValue={event.status} className="w-full bg-white/5 border border-white/10 text-gray-300 text-sm rounded-xl px-4 py-3 outline-none focus:border-[#39ff14]">
+            <select className="w-full bg-white/5 border border-white/10 text-gray-300 text-sm rounded-xl px-4 py-3 outline-none focus:border-[#39ff14]" value={eventStatus} onChange={(e) => setEventStatus(e.target.value as typeof eventStatus)}>
               <option value="draft">Draft</option>
               <option value="published">Published</option>
               <option value="cancelled">Cancelled</option>
@@ -205,7 +298,7 @@ export const CrmEventEditPage = () => {
             <label className="flex items-center justify-between cursor-pointer">
               <span className="text-white text-sm font-bold tracking-widest uppercase">Free Event</span>
               <div className="relative">
-                <input type="checkbox" defaultChecked={event.is_free} className="sr-only peer" />
+                <input type="checkbox" className="sr-only peer" checked={isFree} onChange={(e) => setIsFree(e.target.checked)} />
                 <div className="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-[#39ff14] transition-colors" />
                 <div className="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5" />
               </div>
@@ -215,10 +308,11 @@ export const CrmEventEditPage = () => {
           {/* Submit */}
           <button
             type="submit"
-            className="w-full bg-[#39ff14] text-black px-6 py-4 rounded-xl text-xs font-bold tracking-widest uppercase hover:bg-[#32e612] transition-colors shadow-[0_0_15px_rgba(57,255,20,0.3)] flex items-center justify-center gap-2"
+            disabled={updateEvent.isPending}
+            className="w-full bg-[#39ff14] text-black px-6 py-4 rounded-xl text-xs font-bold tracking-widest uppercase hover:bg-[#32e612] transition-colors shadow-[0_0_15px_rgba(57,255,20,0.3)] flex items-center justify-center gap-2 disabled:opacity-50"
           >
             <Save size={16} />
-            Save Changes
+            {updateEvent.isPending ? 'Saving...' : 'Save Changes'}
           </button>
         </div>
       </form>

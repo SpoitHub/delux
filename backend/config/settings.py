@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     # Local apps
     'auth_app',
+    'events_app',
 ]
 
 MIDDLEWARE = [

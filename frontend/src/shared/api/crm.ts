@@ -1,12 +1,11 @@
 import type { Event, Product, Order } from '../../entities/types';
 import {
-  MOCK_EVENTS,
   MOCK_PRODUCTS,
   SEEDED_ORDERS,
-  getMockEvent,
   getMockProduct,
   getMockOrder,
 } from './mock-data';
+import { apiRequest, getAuthToken } from './client';
 import { useAuthStore } from '../../features/auth/store';
 
 function getCrmUserId(): number {
@@ -28,8 +27,9 @@ export interface DashboardStats {
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {
+  // Will be replaced when crm_app is implemented
   return {
-    events_count: MOCK_EVENTS.length,
+    events_count: 0,
     orders_count: SEEDED_ORDERS.length,
     revenue: SEEDED_ORDERS.reduce((sum, o) => sum + o.total, 0),
     customers_count: 8,
@@ -38,48 +38,76 @@ export async function getDashboardStats(): Promise<DashboardStats> {
 
 // ── CRM Events ──
 
+export interface CrmEventPayload {
+  title?: string;
+  description?: string;
+  format?: 'online' | 'offline';
+  start_datetime?: string;
+  end_datetime?: string;
+  is_free?: boolean;
+  status?: 'draft' | 'published' | 'cancelled' | 'completed';
+  location?: { city: string; address: string } | null;
+  online_info?: { url: string; platform?: string } | null;
+  ticket_types?: Array<{ id?: number; name: string; price: number; quantity_total: number }>;
+  image?: File | null;
+}
+
 export async function getCrmEvents(): Promise<Event[]> {
-  return [...MOCK_EVENTS];
+  return apiRequest<Event[]>('/crm/events/', {}, getAuthToken());
 }
 
 export async function getCrmEvent(id: number | string): Promise<Event> {
-  const event = getMockEvent(id);
-  if (!event) throw new Error('Event not found');
-  return event;
+  return apiRequest<Event>(`/crm/events/${id}/`, {}, getAuthToken());
 }
 
-export async function createCrmEvent(data: Partial<Event>): Promise<Event> {
-  // Mock: return a fake created event
-  return {
-    id: Math.floor(Math.random() * 9000) + 1000,
-    title: data.title ?? 'New Event',
-    description: data.description ?? '',
-    format: data.format ?? 'offline',
-    start_datetime: data.start_datetime ?? new Date().toISOString(),
-    end_datetime: data.end_datetime ?? new Date().toISOString(),
-    is_free: data.is_free ?? false,
-    status: 'draft',
-    location: data.location,
-    online_info: data.online_info,
-    ticket_types: data.ticket_types ?? [],
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  };
+export async function createCrmEvent(data: CrmEventPayload): Promise<Event> {
+  const { image, ...rest } = data;
+
+  // Always use FormData so we can optionally attach an image
+  const form = new FormData();
+  const { location, online_info, ticket_types, ...scalars } = rest;
+
+  // Scalar fields
+  for (const [key, val] of Object.entries(scalars)) {
+    if (val !== undefined && val !== null) form.append(key, String(val));
+  }
+
+  // Nested objects as JSON strings (backend parses them in to_internal_value)
+  if (location !== undefined) form.append('location', JSON.stringify(location));
+  if (online_info !== undefined) form.append('online_info', JSON.stringify(online_info));
+  if (ticket_types !== undefined) form.append('ticket_types', JSON.stringify(ticket_types));
+
+  // Image file
+  if (image) form.append('image', image);
+
+  return apiRequest<Event>('/crm/events/', { method: 'POST', body: form }, getAuthToken());
 }
 
-export async function updateCrmEvent(id: number | string, data: Partial<Event>): Promise<Event> {
-  const event = getMockEvent(id);
-  if (!event) throw new Error('Event not found');
-  return { ...event, ...data, updated_at: new Date().toISOString() };
+export async function updateCrmEvent(id: number | string, data: CrmEventPayload): Promise<Event> {
+  return apiRequest<Event>(`/crm/events/${id}/`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  }, getAuthToken());
+}
+
+export async function deleteCrmEvent(id: number | string): Promise<void> {
+  await apiRequest<void>(`/crm/events/${id}/`, { method: 'DELETE' }, getAuthToken());
 }
 
 export async function publishCrmEvent(id: number | string): Promise<Event> {
-  return updateCrmEvent(id, { status: 'published' });
+  await apiRequest<{ status: string }>(`/crm/events/${id}/publish/`, {
+    method: 'POST',
+  }, getAuthToken());
+  return getCrmEvent(id);
 }
 
 export async function unpublishCrmEvent(id: number | string): Promise<Event> {
-  return updateCrmEvent(id, { status: 'draft' });
+  await apiRequest<{ status: string }>(`/crm/events/${id}/unpublish/`, {
+    method: 'POST',
+  }, getAuthToken());
+  return getCrmEvent(id);
 }
+
 
 // ── CRM Products ──
 
