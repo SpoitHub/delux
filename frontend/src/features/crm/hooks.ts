@@ -12,6 +12,7 @@ import {
   getCrmProduct,
   createCrmProduct,
   updateCrmProduct,
+  deleteCrmProduct,
   getCrmOrders,
   getCrmOrder,
   updateCrmOrderStatus,
@@ -20,8 +21,9 @@ import {
   addCustomerNote,
   type CrmOrderFilters,
   type CrmEventPayload,
+  type CrmProductPayload,
 } from '../../shared/api/crm';
-import type { Product, Order } from '../../entities/types';
+import type { Order } from '../../entities/types';
 
 // ── Dashboard ──
 
@@ -112,7 +114,7 @@ export function useCrmProduct(id: number | string) {
 export function useCreateCrmProduct() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Partial<Product>) => createCrmProduct(data),
+    mutationFn: (data: CrmProductPayload) => createCrmProduct(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm', 'products'] }),
   });
 }
@@ -120,11 +122,19 @@ export function useCreateCrmProduct() {
 export function useUpdateCrmProduct(id: number | string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Partial<Product>) => updateCrmProduct(id, data),
+    mutationFn: (data: CrmProductPayload) => updateCrmProduct(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['crm', 'products'] });
       qc.invalidateQueries({ queryKey: ['crm', 'products', id] });
     },
+  });
+}
+
+export function useDeleteCrmProduct() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number | string) => deleteCrmProduct(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['crm', 'products'] }),
   });
 }
 

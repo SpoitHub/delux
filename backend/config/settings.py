@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     # Local apps
     'auth_app',
     'events_app',
+    'products_app',
 ]
 
 MIDDLEWARE = [

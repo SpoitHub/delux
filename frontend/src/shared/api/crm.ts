@@ -1,8 +1,6 @@
 import type { Event, Product, Order } from '../../entities/types';
 import {
-  MOCK_PRODUCTS,
   SEEDED_ORDERS,
-  getMockProduct,
   getMockOrder,
 } from './mock-data';
 import { apiRequest, getAuthToken } from './client';
@@ -111,35 +109,57 @@ export async function unpublishCrmEvent(id: number | string): Promise<Event> {
 
 // ── CRM Products ──
 
+export interface CrmProductPayload {
+  title?: string;
+  description?: string;
+  price?: number | string;
+  category_id?: number | null;
+  stock_quantity?: number | string;
+  is_active?: boolean;
+  image?: File | null;
+}
+
 export async function getCrmProducts(): Promise<Product[]> {
-  return [...MOCK_PRODUCTS];
+  return apiRequest<Product[]>('/crm/products/', {}, getAuthToken());
 }
 
 export async function getCrmProduct(id: number | string): Promise<Product> {
-  const product = getMockProduct(id);
-  if (!product) throw new Error('Product not found');
-  return product;
+  return apiRequest<Product>(`/crm/products/${id}/`, {}, getAuthToken());
 }
 
-export async function createCrmProduct(data: Partial<Product>): Promise<Product> {
-  return {
-    id: Math.floor(Math.random() * 9000) + 1000,
-    title: data.title ?? 'New Product',
-    description: data.description ?? '',
-    price: data.price ?? 0,
-    category: data.category,
-    stock_quantity: data.stock_quantity ?? 0,
-    is_active: data.is_active ?? true,
-    images: [],
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  };
+export async function createCrmProduct(data: CrmProductPayload): Promise<Product> {
+  const { image, ...rest } = data;
+  const form = new FormData();
+  for (const [key, val] of Object.entries(rest)) {
+    if (val !== undefined && val !== null) form.append(key, String(val));
+  }
+  if (image) form.append('image', image);
+  return apiRequest<Product>('/crm/products/', { method: 'POST', body: form }, getAuthToken());
 }
 
-export async function updateCrmProduct(id: number | string, data: Partial<Product>): Promise<Product> {
-  const product = getMockProduct(id);
-  if (!product) throw new Error('Product not found');
-  return { ...product, ...data, updated_at: new Date().toISOString() };
+export async function updateCrmProduct(id: number | string, data: CrmProductPayload): Promise<Product> {
+  const { image, ...rest } = data;
+  const form = new FormData();
+  for (const [key, val] of Object.entries(rest)) {
+    if (val !== undefined && val !== null) form.append(key, String(val));
+  }
+  if (image) form.append('image', image);
+  return apiRequest<Product>(`/crm/products/${id}/`, { method: 'PATCH', body: form }, getAuthToken());
+}
+
+export async function deleteCrmProduct(id: number | string): Promise<void> {
+  await apiRequest<void>(`/crm/products/${id}/`, { method: 'DELETE' }, getAuthToken());
+}
+
+export async function addProductImage(
+  productId: number | string,
+  imageFile: File,
+  isPrimary = false,
+): Promise<{ id: number; image: string; is_primary: boolean }> {
+  const form = new FormData();
+  form.append('image', imageFile);
+  form.append('is_primary', String(isPrimary));
+  return apiRequest(`/crm/products/${productId}/images/`, { method: 'POST', body: form }, getAuthToken());
 }
 
 // ── CRM Orders ──
