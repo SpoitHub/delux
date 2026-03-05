@@ -7,6 +7,16 @@ import {
   getMockProduct,
   getMockOrder,
 } from './mock-data';
+import { useAuthStore } from '../../features/auth/store';
+
+function getCrmUserId(): number {
+  return useAuthStore.getState().user?.id ?? 0;
+}
+
+function findAnyOrder(id: number | string): Order | undefined {
+  return getMockOrder(getCrmUserId(), id)
+    ?? SEEDED_ORDERS.find((o) => o.id === Number(id));
+}
 
 // ── Dashboard ──
 
@@ -127,7 +137,7 @@ export async function getCrmOrders(filters?: CrmOrderFilters): Promise<Order[]> 
 }
 
 export async function getCrmOrder(id: number | string): Promise<Order> {
-  const order = getMockOrder(id);
+  const order = findAnyOrder(id);
   if (!order) throw new Error('Order not found');
   return order;
 }
@@ -136,7 +146,7 @@ export async function updateCrmOrderStatus(
   id: number | string,
   status: Order['status'],
 ): Promise<Order> {
-  const order = getMockOrder(id);
+  const order = findAnyOrder(id);
   if (!order) throw new Error('Order not found');
   return { ...order, status, updated_at: new Date().toISOString() };
 }

@@ -13,6 +13,7 @@ import { PaymentPage } from '../pages/PaymentPage';
 import { OrderDetailsPage } from '../pages/OrderDetailsPage';
 import { LoginPage } from '../pages/LoginPage';
 import { RegisterPage } from '../pages/RegisterPage';
+import { ProfilePage } from '../pages/ProfilePage';
 import { CrmDashboardPage } from '../pages/CrmDashboardPage';
 import { CrmEventsPage } from '../pages/CrmEventsPage';
 import { CrmEventCreatePage } from '../pages/CrmEventCreatePage';
@@ -45,6 +46,7 @@ export const router = createBrowserRouter([
           { path: 'checkout', element: <CheckoutPage /> },
           { path: 'payment/:orderId', element: <PaymentPage /> },
           { path: 'orders/:id', element: <OrderDetailsPage /> },
+          { path: 'profile', element: <ProfilePage /> },
         ],
       },
     ],

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { mockRegister } from '../shared/api/mock-data';
+import { mockRegister, mockLogin } from '../shared/api/mock-data';
+import { useAuthStore } from '../features/auth/store';
 
 export const RegisterPage = () => {
   const [email, setEmail] = useState('');
@@ -9,20 +10,19 @@ export const RegisterPage = () => {
   const [lastName, setLastName] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const login = useAuthStore((s) => s.login);
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError('');
     try {
-      mockRegister({
-        email,
-        password,
-        first_name: firstName,
-        last_name: lastName,
-      });
-      navigate('/login');
+      mockRegister({ email, password, first_name: firstName, last_name: lastName });
+      // Авто-вход после регистрации
+      const { access, refresh, user } = mockLogin(email, password);
+      login(access, refresh, user);
+      navigate('/');
     } catch (err) {
-      console.error('Registration failed:', err);
-      setError('Registration failed. Please check your details.');
+      setError(err instanceof Error ? err.message : 'Registration failed.');
     }
   };
 

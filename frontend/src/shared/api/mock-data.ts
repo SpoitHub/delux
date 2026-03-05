@@ -558,46 +558,57 @@ export const SEEDED_ORDERS: Order[] = [
   },
 ];
 
-// ── Mock cart (in-memory) ──
+// ── Per-user cart (localStorage) ──
 
-let mockCartIdCounter = 1;
-let mockCart: Cart = { id: 1, items: [], items_count: 0, total: 0 };
+function cartKey(userId: number) { return `mock_cart_${userId}`; }
 
-function recalcCart() {
-  mockCart.items_count = mockCart.items.reduce((s, i) => s + i.quantity, 0);
-  mockCart.total = mockCart.items.reduce((s, i) => s + i.total_price, 0);
+function loadCart(userId: number): Cart {
+  try {
+    const raw = localStorage.getItem(cartKey(userId));
+    return raw ? JSON.parse(raw) : { id: userId, items: [], items_count: 0, total: 0 };
+  } catch { return { id: userId, items: [], items_count: 0, total: 0 }; }
 }
 
-export function getMockCart(): Cart {
-  return { ...mockCart, items: [...mockCart.items] };
+function saveCart(userId: number, cart: Cart) {
+  localStorage.setItem(cartKey(userId), JSON.stringify(cart));
 }
 
-export function addMockCartItem(payload: {
-  item_type: 'product' | 'ticket';
-  product_id?: number;
-  ticket_type_id?: number;
-  quantity: number;
-}): CartItem {
-  // Check if item already exists
-  const existingIdx = mockCart.items.findIndex((i) => {
+function recalcCart(cart: Cart) {
+  cart.items_count = cart.items.reduce((s, i) => s + i.quantity, 0);
+  cart.total = cart.items.reduce((s, i) => s + i.total_price, 0);
+}
+
+export function getMockCart(userId: number): Cart {
+  return loadCart(userId);
+}
+
+export function addMockCartItem(
+  userId: number,
+  payload: { item_type: 'product' | 'ticket'; product_id?: number; ticket_type_id?: number; quantity: number },
+): CartItem {
+  const cart = loadCart(userId);
+
+  const existingIdx = cart.items.findIndex((i) => {
     if (payload.item_type === 'product') return i.item_type === 'product' && i.product?.id === payload.product_id;
     return i.item_type === 'ticket' && i.ticket_type?.id === payload.ticket_type_id;
   });
 
   if (existingIdx >= 0) {
-    const item = mockCart.items[existingIdx];
+    const item = cart.items[existingIdx];
     item.quantity += payload.quantity;
     item.total_price = item.unit_price * item.quantity;
-    recalcCart();
+    recalcCart(cart);
+    saveCart(userId, cart);
     return item;
   }
 
+  const idCounter = cart.items.length > 0 ? Math.max(...cart.items.map((i) => i.id)) + 1 : 1;
   let newItem: CartItem;
 
   if (payload.item_type === 'product') {
     const product = MOCK_PRODUCTS.find((p) => p.id === payload.product_id);
     newItem = {
-      id: ++mockCartIdCounter,
+      id: idCounter,
       item_type: 'product',
       product,
       quantity: payload.quantity,
@@ -605,12 +616,10 @@ export function addMockCartItem(payload: {
       total_price: (product?.price ?? 0) * payload.quantity,
     };
   } else {
-    const event = MOCK_EVENTS.find((e) =>
-      e.ticket_types.some((t) => t.id === payload.ticket_type_id),
-    );
+    const event = MOCK_EVENTS.find((e) => e.ticket_types.some((t) => t.id === payload.ticket_type_id));
     const ticketType = event?.ticket_types.find((t) => t.id === payload.ticket_type_id);
     newItem = {
-      id: ++mockCartIdCounter,
+      id: idCounter,
       item_type: 'ticket',
       event,
       ticket_type: ticketType,
@@ -620,47 +629,69 @@ export function addMockCartItem(payload: {
     };
   }
 
-  mockCart.items.push(newItem);
-  recalcCart();
+  cart.items.push(newItem);
+  recalcCart(cart);
+  saveCart(userId, cart);
   return newItem;
 }
 
-export function updateMockCartItem(itemId: number, quantity: number): CartItem {
-  const item = mockCart.items.find((i) => i.id === itemId);
+export function updateMockCartItem(userId: number, itemId: number, quantity: number): CartItem {
+  const cart = loadCart(userId);
+  const item = cart.items.find((i) => i.id === itemId);
   if (!item) throw new Error('Item not found');
   item.quantity = quantity;
   item.total_price = item.unit_price * quantity;
-  recalcCart();
+  recalcCart(cart);
+  saveCart(userId, cart);
   return item;
 }
 
-export function deleteMockCartItem(itemId: number): void {
-  mockCart.items = mockCart.items.filter((i) => i.id !== itemId);
-  recalcCart();
+export function deleteMockCartItem(userId: number, itemId: number): void {
+  const cart = loadCart(userId);
+  cart.items = cart.items.filter((i) => i.id !== itemId);
+  recalcCart(cart);
+  saveCart(userId, cart);
 }
 
-export function clearMockCart(): void {
-  mockCart = { id: 1, items: [], items_count: 0, total: 0 };
+export function clearMockCart(userId: number): void {
+  saveCart(userId, { id: userId, items: [], items_count: 0, total: 0 });
 }
 
-// ── Mock Orders ──
+// ── Per-user orders (localStorage) ──
 
-let mockOrderIdCounter = 1000;
-const mockOrders: Order[] = [];
+function ordersKey(userId: number) { return `mock_orders_${userId}`; }
 
-export function createMockOrder(payload: {
-  delivery_type: string;
-  contact: { name: string; phone: string };
-  shipping_address?: { city: string; address_line: string; postal_code?: string };
-}): Order {
+function loadOrders(userId: number): Order[] {
+  try {
+    const raw = localStorage.getItem(ordersKey(userId));
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+function saveOrders(userId: number, orders: Order[]) {
+  localStorage.setItem(ordersKey(userId), JSON.stringify(orders));
+}
+
+export function createMockOrder(
+  userId: number,
+  payload: {
+    delivery_type: string;
+    contact: { name: string; phone: string };
+    shipping_address?: { city: string; address_line: string; postal_code?: string };
+  },
+): Order {
+  const cart = loadCart(userId);
+  const orders = loadOrders(userId);
+  const newId = orders.length > 0 ? Math.max(...orders.map((o) => o.id)) + 1 : 1001;
+
   const order: Order = {
-    id: ++mockOrderIdCounter,
+    id: newId,
     status: 'confirmed',
     payment_status: 'pending',
     delivery_type: payload.delivery_type as Order['delivery_type'],
     contact: payload.contact,
     shipping_address: payload.shipping_address,
-    items: mockCart.items.map((item) => ({
+    items: cart.items.map((item) => ({
       id: item.id,
       item_type: item.item_type,
       product: item.product,
@@ -670,41 +701,40 @@ export function createMockOrder(payload: {
       unit_price: item.unit_price,
       total_price: item.total_price,
     })),
-    total: mockCart.total,
+    total: cart.total,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };
 
-  mockOrders.push(order);
-  clearMockCart();
+  orders.push(order);
+  saveOrders(userId, orders);
+  clearMockCart(userId);
   return order;
 }
 
-export function getMockOrder(id: number | string): Order | undefined {
-  return mockOrders.find((o) => o.id === Number(id)) ?? SEEDED_ORDERS.find((o) => o.id === Number(id));
+export function getMockOrder(userId: number, id: number | string): Order | undefined {
+  return loadOrders(userId).find((o) => o.id === Number(id));
 }
 
-// ── Mock Auth ──
+// ── Mock Auth (user registry in localStorage) ──
 
-export const MOCK_USER = {
-  id: 1,
-  email: 'demo@delux.net',
-  first_name: 'Alex',
-  last_name: 'Johnson',
-  is_organizer: true,
-};
+interface StoredUser {
+  id: number;
+  email: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
+  is_organizer: boolean;
+}
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function mockLogin(email: string, _password?: string) {
-  // Accept any credentials for demo purposes
-  return {
-    access: 'mock-access-token-' + Date.now(),
-    refresh: 'mock-refresh-token-' + Date.now(),
-    user: {
-      ...MOCK_USER,
-      email,
-    },
-  };
+function loadUsers(): StoredUser[] {
+  try { return JSON.parse(localStorage.getItem('mock_users') || '[]'); }
+  catch { return []; }
+}
+
+function saveUsers(users: StoredUser[]) {
+  localStorage.setItem('mock_users', JSON.stringify(users));
 }
 
 export function mockRegister(data: {
@@ -713,11 +743,58 @@ export function mockRegister(data: {
   first_name: string;
   last_name: string;
 }) {
+  const users = loadUsers();
+  if (users.find((u) => u.email.toLowerCase() === data.email.toLowerCase())) {
+    throw new Error('Email already registered');
+  }
+  const newId = users.length > 0 ? Math.max(...users.map((u) => u.id)) + 1 : 1;
+  const user: StoredUser = { ...data, id: newId, phone: '', is_organizer: false };
+  users.push(user);
+  saveUsers(users);
+  return { id: user.id, email: user.email, first_name: user.first_name, last_name: user.last_name, phone: '', is_organizer: false };
+}
+
+export function mockLogin(email: string, password: string) {
+  const users = loadUsers();
+  const user = users.find(
+    (u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password,
+  );
+  if (!user) throw new Error('Invalid email or password');
   return {
-    id: 2,
-    email: data.email,
-    first_name: data.first_name,
-    last_name: data.last_name,
-    is_organizer: false,
+    access: 'mock-access-' + Date.now(),
+    refresh: 'mock-refresh-' + Date.now(),
+    user: { id: user.id, email: user.email, first_name: user.first_name, last_name: user.last_name, phone: user.phone, is_organizer: user.is_organizer },
   };
+}
+
+export function mockUpdateProfile(
+  userId: number,
+  data: { first_name?: string; last_name?: string; phone?: string },
+) {
+  const users = loadUsers();
+  const idx = users.findIndex((u) => u.id === userId);
+
+  if (idx < 0) {
+    // Пользователь вошёл через старый механизм — создаём запись автоматически
+    const stored = localStorage.getItem('mock_user');
+    const current = stored ? JSON.parse(stored) : null;
+    if (!current || current.id !== userId) throw new Error('User not found');
+    const entry: StoredUser = {
+      id: current.id,
+      email: current.email,
+      password: '',
+      first_name: data.first_name ?? current.first_name ?? '',
+      last_name: data.last_name ?? current.last_name ?? '',
+      phone: data.phone ?? current.phone ?? '',
+      is_organizer: current.is_organizer ?? false,
+    };
+    users.push(entry);
+    saveUsers(users);
+    return { id: entry.id, email: entry.email, first_name: entry.first_name, last_name: entry.last_name, phone: entry.phone, is_organizer: entry.is_organizer };
+  }
+
+  users[idx] = { ...users[idx], ...data };
+  saveUsers(users);
+  const u = users[idx];
+  return { id: u.id, email: u.email, first_name: u.first_name, last_name: u.last_name, phone: u.phone, is_organizer: u.is_organizer };
 }
