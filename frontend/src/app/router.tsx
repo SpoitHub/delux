@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 import { MainLayout } from './layouts/MainLayout';
 import { OrganizerLayout } from './layouts/OrganizerLayout';
+import { RequireAuth } from './guards/RequireAuth';
 import { HomePage } from '../pages/HomePage';
 import { EventsListPage } from '../pages/EventsListPage';
 import { EventDetailsPage } from '../pages/EventDetailsPage';
@@ -33,12 +34,19 @@ export const router = createBrowserRouter([
       { path: 'events/:id', element: <EventDetailsPage /> },
       { path: 'shop', element: <ProductsListPage /> },
       { path: 'products/:id', element: <ProductDetailsPage /> },
-      { path: 'cart', element: <CartPage /> },
-      { path: 'checkout', element: <CheckoutPage /> },
-      { path: 'payment/:orderId', element: <PaymentPage /> },
-      { path: 'orders/:id', element: <OrderDetailsPage /> },
+      // Публичные
       { path: 'login', element: <LoginPage /> },
       { path: 'register', element: <RegisterPage /> },
+      // Только для авторизованных
+      {
+        element: <RequireAuth />,
+        children: [
+          { path: 'cart', element: <CartPage /> },
+          { path: 'checkout', element: <CheckoutPage /> },
+          { path: 'payment/:orderId', element: <PaymentPage /> },
+          { path: 'orders/:id', element: <OrderDetailsPage /> },
+        ],
+      },
     ],
   },
   {

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuthStore } from '../features/auth/store';
 import { mockLogin } from '../shared/api/mock-data';
 
@@ -8,14 +8,18 @@ export const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
   const login = useAuthStore((state) => state.login);
+
+  // Куда вернуться после логина (если пришли с защищённого роута)
+  const from = (location.state as { from?: string } | null)?.from || '/';
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       const { access, refresh, user } = mockLogin(email, password);
       login(access, refresh, user);
-      navigate('/');
+      navigate(from, { replace: true });
     } catch (err) {
       console.error('Login failed:', err);
       setError('Invalid credentials. Access denied.');
