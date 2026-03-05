@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'auth_app',
     'events_app',
     'products_app',
+    'cart_app',
 ]
 
 MIDDLEWARE = [

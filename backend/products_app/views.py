@@ -1,4 +1,5 @@
 from django.db.models import Q
+from django.utils.text import slugify
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.permissions import AllowAny
@@ -77,6 +78,31 @@ class ProductDetailView(APIView):
 
 
 # ─── CRM Views ────────────────────────────────────────────────────────────────
+
+class CrmCategoryListCreateView(APIView):
+    """GET all categories / POST to create one."""
+    permission_classes = [IsOrganizer]
+
+    def get(self, request):
+        categories = Category.objects.all()
+        return Response(CategorySerializer(categories, many=True).data)
+
+    def post(self, request):
+        name = (request.data.get('name') or '').strip()
+        if not name:
+            return Response({'detail': 'name is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Auto-generate unique slug
+        base_slug = slugify(name)
+        slug = base_slug
+        counter = 1
+        while Category.objects.filter(slug=slug).exists():
+            slug = f'{base_slug}-{counter}'
+            counter += 1
+
+        category = Category.objects.create(name=name, slug=slug)
+        return Response(CategorySerializer(category).data, status=status.HTTP_201_CREATED)
+
 
 class CrmProductListCreateView(APIView):
     permission_classes = [IsOrganizer]

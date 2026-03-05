@@ -26,6 +26,7 @@ urlpatterns = [
     path('api/v1/auth/',         include('auth_app.urls')),
     path('api/v1/events/',       include('events_app.urls')),
     path('api/v1/products/',     include('products_app.urls')),
+    path('api/v1/cart/',         include('cart_app.urls')),
     path('api/v1/crm/events/',   include(events_crm_urls)),
     path('api/v1/crm/products/', include(products_crm_urls)),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -3,6 +3,7 @@ from .views import (
     CategoryListView,
     ProductListView,
     ProductDetailView,
+    CrmCategoryListCreateView,
     CrmProductListCreateView,
     CrmProductDetailView,
     CrmProductImageView,
@@ -18,6 +19,7 @@ urlpatterns = [
 # CRM: /api/v1/crm/products/  (included separately in config/urls.py)
 crm_urlpatterns = [
     path('',                 CrmProductListCreateView.as_view(), name='crm-product-list'),
+    path('categories/',      CrmCategoryListCreateView.as_view(), name='crm-category-list'),
     path('<int:pk>/',        CrmProductDetailView.as_view(),     name='crm-product-detail'),
     path('<int:pk>/images/', CrmProductImageView.as_view(),      name='crm-product-images'),
 ]

@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Save, Package, Image, Trash2, AlertTriangle, X } from 'lucide-react';
 import { useToast } from '../shared/ui/toast-context';
 import { useCrmProduct, useUpdateCrmProduct, useDeleteCrmProduct } from '../features/crm/hooks';
-import { useCategories } from '../features/products/hooks';
+import { CategorySelect } from '../shared/ui/CategorySelect';
 import { PageSpinner } from '../shared/ui/Spinner';
 
 type FormErrors = Record<string, string>;
@@ -14,7 +14,6 @@ export const CrmProductEditPage = () => {
   const { toast } = useToast();
 
   const { data: product, isLoading, isError } = useCrmProduct(id!);
-  const { data: categories = [] } = useCategories();
   const updateProduct = useUpdateCrmProduct(id!);
   const deleteProduct = useDeleteCrmProduct();
 
@@ -216,17 +215,10 @@ export const CrmProductEditPage = () => {
               </div>
               <div>
                 <label htmlFor="product-category" className={labelClass}>Category</label>
-                <select
-                  id="product-category"
+                <CategorySelect
                   value={categoryId}
-                  onChange={(e) => setCategoryId(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 text-gray-300 text-sm rounded-xl px-4 py-3 outline-none focus:border-[#39ff14]"
-                >
-                  <option value="">No Category</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>{cat.name}</option>
-                  ))}
-                </select>
+                  onChange={setCategoryId}
+                />
               </div>
             </div>
           </div>

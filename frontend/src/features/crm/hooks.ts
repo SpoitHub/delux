@@ -13,6 +13,8 @@ import {
   createCrmProduct,
   updateCrmProduct,
   deleteCrmProduct,
+  getCrmCategories,
+  createCategory,
   getCrmOrders,
   getCrmOrder,
   updateCrmOrderStatus,
@@ -135,6 +137,24 @@ export function useDeleteCrmProduct() {
   return useMutation({
     mutationFn: (id: number | string) => deleteCrmProduct(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm', 'products'] }),
+  });
+}
+
+export function useCrmCategories() {
+  return useQuery({
+    queryKey: ['crm', 'categories'],
+    queryFn: getCrmCategories,
+  });
+}
+
+export function useCreateCategory() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (name: string) => createCategory(name),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['crm', 'categories'] });
+      qc.invalidateQueries({ queryKey: ['categories'] });
+    },
   });
 }
 

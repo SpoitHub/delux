@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Search, Filter, ShoppingBag, Star, X } from 'lucide-react';
+import { Search, ShoppingBag, Star, X, SlidersHorizontal, Tag } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useProducts } from '../features/products/hooks';
+import { useProducts, useCategories } from '../features/products/hooks';
 import { useAddToCart } from '../features/cart/hooks';
 import { formatPrice } from '../shared/lib/formatters';
 import { ProductCardSkeleton } from '../shared/ui/Skeleton';
@@ -9,18 +9,17 @@ import { EmptyState } from '../shared/ui/EmptyState';
 import { useToast } from '../shared/ui/toast-context';
 import type { ProductFilters } from '../entities/types';
 
-const CATEGORIES = ['All', 'Apparel', 'Footwear', 'Accessories', 'Equipment'];
-
 export const ProductsListPage = () => {
-  const [activeCategory, setActiveCategory] = useState('All');
+  const [activeCategory, setActiveCategory] = useState('');
   const [search, setSearch] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
   const addToCart = useAddToCart();
+  const { data: categories, isLoading: categoriesLoading } = useCategories();
 
   const filters: ProductFilters = {};
   if (searchQuery) filters.search = searchQuery;
-  if (activeCategory !== 'All') filters.category = activeCategory;
+  if (activeCategory) filters.category = activeCategory;
 
   const { data, isLoading, isError } = useProducts(filters);
 
@@ -32,10 +31,10 @@ export const ProductsListPage = () => {
   const clearFilters = () => {
     setSearch('');
     setSearchQuery('');
-    setActiveCategory('All');
+    setActiveCategory('');
   };
 
-  const hasActiveFilters = searchQuery || activeCategory !== 'All';
+  const hasActiveFilters = searchQuery || activeCategory !== '';
   const products = data?.results ?? [];
 
   const handleAddToCart = (e: React.MouseEvent, productId: number) => {
@@ -74,35 +73,92 @@ export const ProductsListPage = () => {
             className="w-full bg-[#111] border border-white/10 text-white text-xs font-bold tracking-widest uppercase rounded-full py-4 pl-12 pr-4 focus:outline-none focus:border-[#39ff14] transition-colors"
           />
           <button type="submit" className="absolute inset-y-2 right-2 bg-[#39ff14] text-black p-2 rounded-full hover:bg-[#32e612] transition-colors">
-            <Filter size={14} />
+            <Search size={14} />
           </button>
         </form>
       </div>
 
-      {/* Categories */}
-      <div className="flex overflow-x-auto pb-4 mb-8 gap-3 scrollbar-hide">
-        {CATEGORIES.map((category) => (
+      {/* Category Filter */}
+      <div className="mb-10">
+        {/* Filter header */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <SlidersHorizontal size={14} className="text-[#39ff14]" />
+            <span className="text-xs font-black tracking-widest uppercase text-gray-400">
+              Filter by Category
+            </span>
+          </div>
+          {data && (
+            <span className="text-xs font-bold text-gray-600 tracking-widest">
+              {data.count} product{data.count !== 1 ? 's' : ''}
+            </span>
+          )}
+        </div>
+
+        {/* Pills row */}
+        <div className="flex overflow-x-auto pb-2 gap-2 scrollbar-hide">
+          {/* All */}
           <button
-            key={category}
-            onClick={() => setActiveCategory(category)}
-            className={`px-6 py-2 rounded-full text-xs font-bold tracking-widest uppercase whitespace-nowrap transition-all duration-300 ${
-              activeCategory === category 
-                ? 'bg-[#39ff14] text-black shadow-[0_0_15px_rgba(57,255,20,0.3)]' 
-                : 'bg-[#111] text-gray-400 border border-white/5 hover:border-[#39ff14]/50 hover:text-white'
+            onClick={() => setActiveCategory('')}
+            className={`group relative flex-shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-black tracking-widest uppercase transition-all duration-300 ${
+              activeCategory === ''
+                ? 'bg-[#39ff14] text-black shadow-[0_0_22px_rgba(57,255,20,0.45)] scale-105'
+                : 'bg-[#111] text-gray-400 border border-white/10 hover:border-[#39ff14]/50 hover:text-white hover:scale-105 hover:shadow-[0_0_12px_rgba(57,255,20,0.1)]'
             }`}
           >
-            {category}
+            <Tag size={11} className={activeCategory === '' ? 'text-black' : 'text-gray-500 group-hover:text-[#39ff14]'} />
+            All
           </button>
-        ))}
-        {hasActiveFilters && (
-          <button
-            onClick={clearFilters}
-            className="px-4 py-2 rounded-full text-xs font-bold tracking-widest uppercase text-gray-400 hover:text-white flex items-center gap-1 transition-colors"
-          >
-            <X size={12} />
-            Clear
-          </button>
-        )}
+
+          {/* Skeleton pills while loading */}
+          {categoriesLoading &&
+            [1, 2, 3, 4, 5].map((i) => (
+              <div
+                key={i}
+                className="flex-shrink-0 h-9 rounded-full bg-white/5 animate-pulse"
+                style={{ width: `${60 + i * 14}px` }}
+              />
+            ))}
+
+          {/* Real category pills */}
+          {categories?.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setActiveCategory(cat.slug)}
+              className={`group relative flex-shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-black tracking-widest uppercase transition-all duration-300 ${
+                activeCategory === cat.slug
+                  ? 'bg-[#39ff14] text-black shadow-[0_0_22px_rgba(57,255,20,0.45)] scale-105'
+                  : 'bg-[#111] text-gray-400 border border-white/10 hover:border-[#39ff14]/50 hover:text-white hover:scale-105 hover:shadow-[0_0_12px_rgba(57,255,20,0.1)]'
+              }`}
+            >
+              <span
+                className={`w-1.5 h-1.5 rounded-full flex-shrink-0 transition-colors duration-300 ${
+                  activeCategory === cat.slug ? 'bg-black' : 'bg-[#39ff14]/40 group-hover:bg-[#39ff14]'
+                }`}
+              />
+              {cat.name}
+            </button>
+          ))}
+
+          {/* Clear all */}
+          {hasActiveFilters && (
+            <button
+              onClick={clearFilters}
+              className="flex-shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-black tracking-widest uppercase text-gray-500 border border-white/5 hover:border-red-500/40 hover:text-red-400 transition-all duration-300"
+            >
+              <X size={11} />
+              Clear
+            </button>
+          )}
+        </div>
+
+        {/* Active filter indicator line */}
+        <div className="mt-4 h-px bg-white/5 relative overflow-hidden">
+          <div
+            className="absolute left-0 top-0 h-full bg-gradient-to-r from-[#39ff14]/60 to-transparent transition-all duration-500"
+            style={{ width: hasActiveFilters ? '100%' : '30%', opacity: hasActiveFilters ? 1 : 0.3 }}
+          />
+        </div>
       </div>
 
       {/* Loading */}

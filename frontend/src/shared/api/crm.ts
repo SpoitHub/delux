@@ -119,6 +119,17 @@ export interface CrmProductPayload {
   image?: File | null;
 }
 
+export async function getCrmCategories(): Promise<import('../../entities/types').Category[]> {
+  return apiRequest('/crm/products/categories/', {}, getAuthToken());
+}
+
+export async function createCategory(name: string): Promise<import('../../entities/types').Category> {
+  return apiRequest('/crm/products/categories/', {
+    method: 'POST',
+    body: JSON.stringify({ name }),
+  }, getAuthToken());
+}
+
 export async function getCrmProducts(): Promise<Product[]> {
   return apiRequest<Product[]>('/crm/products/', {}, getAuthToken());
 }
