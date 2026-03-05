@@ -988,7 +988,7 @@ is_primary: true
 - [x] **Этап 1** — `auth_app`: User, OrganizerProfile, JWT register/login/me
 - [x] **Этап 2** — `events_app`: Event, TicketType, list/detail endpoints
 - [x] **Этап 3** — `products_app`: Category, Product, ProductImage, list/detail
-- [ ] **Этап 4** — `cart_app`: Cart, CartItem, GET/POST/PATCH/DELETE/clear
+- [x] **Этап 4** — `cart_app`: Cart, CartItem, GET/POST/PATCH/DELETE/clear
 - [ ] **Этап 5** — `orders_app`: Order, OrderItem, create/detail
 - [ ] **Этап 6** — `payments_app`: Payment, mock/charge
 - [ ] **Этап 7** — `crm_app`: dashboard, events CRUD, products CRUD, orders, customers+notes
