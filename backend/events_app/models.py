@@ -4,7 +4,7 @@ from auth_app.models import OrganizerProfile
 
 class EventLocation(models.Model):
     city = models.CharField(max_length=255)
-    address = models.CharField(max_length=255)
+    address = models.CharField(max_length=255, blank=True)
 
     def __str__(self):
         return f'{self.city}, {self.address}'
