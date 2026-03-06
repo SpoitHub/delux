@@ -12,6 +12,15 @@ export const PaymentPage = () => {
   const { data: order, isLoading } = useOrder(orderId ?? '');
   const [processing, setProcessing] = useState(false);
   const [paid, setPaid] = useState(false);
+  const [expiry, setExpiry] = useState('');
+
+  const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, ''); // Remove non-digits
+    if (val.length >= 3) {
+      val = `${val.slice(0, 2)} / ${val.slice(2, 4)}`;
+    }
+    setExpiry(val);
+  };
 
   if (isLoading) return <PageSpinner />;
 
@@ -95,6 +104,8 @@ export const PaymentPage = () => {
                   type="text"
                   placeholder="MM / YY"
                   maxLength={7}
+                  value={expiry}
+                  onChange={handleExpiryChange}
                   className="w-full bg-white/5 border border-white/10 rounded-lg py-3 px-4 text-white placeholder-gray-600 focus:outline-none focus:border-[#39ff14] transition-colors"
                 />
               </div>
