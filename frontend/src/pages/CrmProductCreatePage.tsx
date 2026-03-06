@@ -11,7 +11,6 @@ export const CrmProductCreatePage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const createProduct = useCreateCrmProduct();
-  const { data: categories = [] } = useCategories();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
