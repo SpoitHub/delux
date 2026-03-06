@@ -20,13 +20,25 @@ from django.conf import settings
 from django.conf.urls.static import static
 from events_app.urls import crm_urlpatterns as events_crm_urls
 from products_app.urls import crm_urlpatterns as products_crm_urls
+from django.http import JsonResponse
+
+def api_root(request):
+    return JsonResponse({
+        "name": "Delux API",
+        "version": "1.0",
+        "status": "online"
+    })
 
 urlpatterns = [
+    path('', api_root, name='api-root'),
     path('admin/', admin.site.urls),
     path('api/v1/auth/',         include('auth_app.urls')),
     path('api/v1/events/',       include('events_app.urls')),
     path('api/v1/products/',     include('products_app.urls')),
     path('api/v1/cart/',         include('cart_app.urls')),
+    path('api/v1/orders/',       include('orders_app.urls')),
+    path('api/v1/payments/',     include('payments_app.urls')),
     path('api/v1/crm/events/',   include(events_crm_urls)),
     path('api/v1/crm/products/', include(products_crm_urls)),
+    path('api/v1/crm/',          include('crm_app.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
