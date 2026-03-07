@@ -22,14 +22,29 @@ class CustomerSerializer(serializers.ModelSerializer):
         fields = ['id', 'email', 'first_name', 'last_name', 'orders_count', 'total_spent', 'last_order_date', 'notes', 'orders']
 
     def get_notes(self, obj):
-        organizer = self.context['request'].user.organizerprofile
-        notes = CustomerNote.objects.filter(customer=obj, organizer=organizer).order_by('-created_at')
+        request = self.context.get('request')
+        if not request or not request.user.is_authenticated:
+            return []
+            
+        if request.user.is_superuser:
+            notes = CustomerNote.objects.filter(customer=obj).order_by('-created_at')
+        else:
+            organizer = getattr(request.user, 'organizerprofile', None)
+            notes = CustomerNote.objects.filter(customer=obj, organizer=organizer).order_by('-created_at')
         return CustomerNoteSerializer(notes, many=True).data
 
     def get_orders(self, obj):
-        organizer = self.context['request'].user.organizerprofile
+        request = self.context.get('request')
+        if not request or not request.user.is_authenticated:
+            return []
+
         from orders_app.models import Order
-        orders = Order.objects.filter(user=obj, items__ticket_type__event__organizer=organizer).distinct()
+        if request.user.is_superuser:
+            orders = Order.objects.filter(user=obj).distinct()
+        else:
+            organizer = getattr(request.user, 'organizerprofile', None)
+            orders = Order.objects.filter(user=obj, items__ticket_type__event__organizer=organizer).distinct()
+            
         return OrderSerializer(orders, many=True).data
 
 class DashboardStatSerializer(serializers.Serializer):

@@ -15,19 +15,25 @@ class DashboardView(views.APIView):
     permission_classes = [IsOrganizer]
 
     def get(self, request, *args, **kwargs):
-        organizer = request.user.organizerprofile
-        
-        events_count = Event.objects.filter(organizer=organizer).count()
-        orders = Order.objects.filter(items__ticket_type__event__organizer=organizer).distinct()
-        orders_count = orders.count()
-        
-        from orders_app.models import OrderItem
-        revenue = OrderItem.objects.filter(
-            order__in=orders, 
-            ticket_type__event__organizer=organizer
-        ).aggregate(total=Sum('total_price'))['total'] or 0.00
-        
-        customers_count = User.objects.filter(orders__in=orders).distinct().count()
+        is_su = request.user.is_superuser
+        organizer = getattr(request.user, 'organizerprofile', None)
+
+        if is_su:
+            events_count = Event.objects.count()
+            orders = Order.objects.all()
+            orders_count = orders.count()
+            from orders_app.models import OrderItem
+            revenue = OrderItem.objects.aggregate(total=Sum('total_price'))['total'] or 0.00
+            customers_count = User.objects.filter(orders__in=orders).distinct().count()
+        else:
+            events_count = Event.objects.filter(organizer=organizer).count()
+            orders = Order.objects.filter(items__ticket_type__event__organizer=organizer).distinct()
+            from orders_app.models import OrderItem
+            revenue = OrderItem.objects.filter(
+                order__in=orders, 
+                ticket_type__event__organizer=organizer
+            ).aggregate(total=Sum('total_price'))['total'] or 0.00
+            customers_count = User.objects.filter(orders__in=orders).distinct().count()
 
         data = {
             "events_count": events_count,
@@ -45,8 +51,11 @@ class CrmOrderListView(generics.ListAPIView):
     serializer_class = OrderSerializer
 
     def get_queryset(self):
-        organizer = self.request.user.organizerprofile
-        qs = Order.objects.filter(items__ticket_type__event__organizer=organizer).distinct()
+        if self.request.user.is_superuser:
+            qs = Order.objects.all()
+        else:
+            organizer = getattr(self.request.user, 'organizerprofile', None)
+            qs = Order.objects.filter(items__ticket_type__event__organizer=organizer).distinct()
         
         status_param = self.request.query_params.get('status')
         if status_param:
@@ -63,7 +72,9 @@ class CrmOrderDetailView(generics.RetrieveUpdateAPIView):
     serializer_class = OrderSerializer
 
     def get_queryset(self):
-        organizer = self.request.user.organizerprofile
+        if self.request.user.is_superuser:
+            return Order.objects.all()
+        organizer = getattr(self.request.user, 'organizerprofile', None)
         return Order.objects.filter(items__ticket_type__event__organizer=organizer).distinct()
 
     def update(self, request, *args, **kwargs):
@@ -89,7 +100,17 @@ class CustomerListView(generics.ListAPIView):
     serializer_class = CustomerSerializer
 
     def get_queryset(self):
-        organizer = self.request.user.organizerprofile
+        if self.request.user.is_superuser:
+            orders = Order.objects.all()
+            qs = User.objects.filter(orders__in=orders).distinct()
+            qs = qs.annotate(
+                orders_count=Count('orders', filter=Q(orders__in=orders), distinct=True),
+                total_spent=Sum('orders__items__total_price'),
+                last_order_date=Max('orders__created_at', filter=Q(orders__in=orders))
+            )
+            return qs
+
+        organizer = getattr(self.request.user, 'organizerprofile', None)
         orders = Order.objects.filter(items__ticket_type__event__organizer=organizer)
         
         qs = User.objects.filter(orders__in=orders).distinct()
@@ -105,7 +126,17 @@ class CustomerDetailView(generics.RetrieveAPIView):
     serializer_class = CustomerSerializer
 
     def get_queryset(self):
-        organizer = self.request.user.organizerprofile
+        if self.request.user.is_superuser:
+            orders = Order.objects.all()
+            qs = User.objects.filter(orders__in=orders).distinct()
+            qs = qs.annotate(
+                orders_count=Count('orders', filter=Q(orders__in=orders), distinct=True),
+                total_spent=Sum('orders__items__total_price'),
+                last_order_date=Max('orders__created_at', filter=Q(orders__in=orders))
+            )
+            return qs
+
+        organizer = getattr(self.request.user, 'organizerprofile', None)
         orders = Order.objects.filter(items__ticket_type__event__organizer=organizer)
         
         qs = User.objects.filter(orders__in=orders).distinct()

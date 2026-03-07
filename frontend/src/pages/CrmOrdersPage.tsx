@@ -1,17 +1,17 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Eye, Download, Filter } from 'lucide-react';
-
-const MOCK_ORDERS = [
-  { id: 1042, customer: 'Alex Johnson', email: 'alex.j@example.com', items: '2x Pro Elite Jersey', total: '$240.00', status: 'Completed', date: 'Oct 24, 2024 14:30' },
-  { id: 1043, customer: 'Sarah Smith', email: 'sarah.s@example.com', items: '1x UFC 300 VIP Ticket', total: '$800.00', status: 'Processing', date: 'Oct 24, 2024 15:45' },
-  { id: 1044, customer: 'Mike Brown', email: 'mike.b@example.com', items: '1x Carbon Cleats', total: '$250.00', status: 'Completed', date: 'Oct 24, 2024 16:10' },
-  { id: 1045, customer: 'Emma Davis', email: 'emma.d@example.com', items: '2x NBA Finals Ticket', total: '$2400.00', status: 'Pending', date: 'Oct 24, 2024 17:20' },
-  { id: 1046, customer: 'James Wilson', email: 'james.w@example.com', items: '1x Performance Hoodie', total: '$85.00', status: 'Cancelled', date: 'Oct 24, 2024 18:05' },
-];
+import { useCrmOrders } from '../features/crm/hooks';
 
 export const CrmOrdersPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const { data: orders = [], isLoading } = useCrmOrders();
+
+  const filteredOrders = orders.filter((o) => {
+    const searchLow = searchTerm.toLowerCase();
+    return o.contact.name.toLowerCase().includes(searchLow) ||
+           o.id.toString().includes(searchLow);
+  });
 
   return (
     <div className="space-y-8">
@@ -69,41 +69,51 @@ export const CrmOrdersPage = () => {
               </tr>
             </thead>
             <tbody>
-              {MOCK_ORDERS.map((order) => (
-                <tr key={order.id} className="border-b border-white/5 hover:bg-white/5 transition-colors group">
-                  <td className="p-4">
-                    <div className="text-white text-sm font-bold mb-1">ORD-{order.id}</div>
-                    <div className="text-gray-500 text-[10px] font-bold tracking-widest uppercase">{order.date}</div>
-                  </td>
-                  <td className="p-4">
-                    <div className="text-white text-sm font-bold">{order.customer}</div>
-                    <div className="text-gray-500 text-[10px] font-bold tracking-widest uppercase">{order.email}</div>
-                  </td>
-                  <td className="p-4">
-                    <div className="text-gray-300 text-xs font-bold">{order.items}</div>
-                  </td>
-                  <td className="p-4">
-                    <div className="text-white text-sm font-black">{order.total}</div>
-                  </td>
-                  <td className="p-4">
-                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase ${
-                      order.status === 'Completed' ? 'bg-[#39ff14]/10 text-[#39ff14] border border-[#39ff14]/20' :
-                      order.status === 'Processing' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
-                      order.status === 'Pending' ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20' :
-                      'bg-red-500/10 text-red-500 border border-red-500/20'
-                    }`}>
-                      {order.status}
-                    </span>
-                  </td>
-                  <td className="p-4 text-right">
-                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Link to={`/crm/orders/${order.id}`} className="p-2 text-gray-400 hover:text-[#39ff14] hover:bg-[#39ff14]/10 rounded-lg transition-colors" title="View order">
-                        <Eye size={16} />
-                      </Link>
-                    </div>
-                  </td>
+              {isLoading ? (
+                <tr>
+                  <td colSpan={6} className="p-8 text-center text-gray-500 text-sm font-bold tracking-widest uppercase">Loading orders...</td>
                 </tr>
-              ))}
+              ) : filteredOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="p-8 text-center text-gray-500 text-sm font-bold tracking-widest uppercase">No orders found.</td>
+                </tr>
+              ) : (
+                filteredOrders.map((order) => (
+                  <tr key={order.id} className="border-b border-white/5 hover:bg-white/5 transition-colors group">
+                    <td className="p-4">
+                      <div className="text-white text-sm font-bold mb-1">ORD-{order.id}</div>
+                      <div className="text-gray-500 text-[10px] font-bold tracking-widest uppercase">{new Date(order.created_at).toLocaleString()}</div>
+                    </td>
+                    <td className="p-4">
+                      <div className="text-white text-sm font-bold">{order.contact.name}</div>
+                      <div className="text-gray-500 text-[10px] font-bold tracking-widest uppercase">{order.contact.phone}</div>
+                    </td>
+                    <td className="p-4">
+                      <div className="text-gray-300 text-xs font-bold">{order.items.length} item(s)</div>
+                    </td>
+                    <td className="p-4">
+                      <div className="text-white text-sm font-black">${Number(order.total).toFixed(2)}</div>
+                    </td>
+                    <td className="p-4">
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase ${
+                        order.status === 'delivered' ? 'bg-[#39ff14]/10 text-[#39ff14] border border-[#39ff14]/20' :
+                        order.status === 'processing' || order.status === 'shipped' || order.status === 'confirmed' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
+                        order.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20' :
+                        'bg-red-500/10 text-red-500 border border-red-500/20'
+                      }`}>
+                        {order.status}
+                      </span>
+                    </td>
+                    <td className="p-4 text-right">
+                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Link to={`/crm/orders/${order.id}`} className="p-2 text-gray-400 hover:text-[#39ff14] hover:bg-[#39ff14]/10 rounded-lg transition-colors" title="View order">
+                          <Eye size={16} />
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

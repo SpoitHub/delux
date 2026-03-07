@@ -86,10 +86,8 @@ class EventWriteSerializer(serializers.ModelSerializer):
         which expects keys like 'ticket_types[0]name' instead of a Python list,
         causing ticket_types to always be treated as empty.
         """
-        # Flatten to a plain dict so DRF uses dict.get() for every field,
-        # including the many=True ticket_types serializer.
+        
         if hasattr(data, 'getlist'):
-            # QueryDict / DataAndFiles — dict(data.items()) picks last value per key
             plain: dict = dict(data.items())
         else:
             plain = dict(data)

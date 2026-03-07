@@ -1,45 +1,44 @@
 import { Link } from 'react-router-dom';
 import { Users, Calendar, ShoppingBag, DollarSign, ArrowUpRight, ArrowDownRight } from 'lucide-react';
-
-const STATS = [
-  {
-    title: 'Total Revenue',
-    value: '$124,500',
-    change: '+14.5%',
-    isPositive: true,
-    icon: DollarSign,
-  },
-  {
-    title: 'Active Events',
-    value: '12',
-    change: '+2',
-    isPositive: true,
-    icon: Calendar,
-  },
-  {
-    title: 'Products Sold',
-    value: '845',
-    change: '-5.2%',
-    isPositive: false,
-    icon: ShoppingBag,
-  },
-  {
-    title: 'New Customers',
-    value: '1,240',
-    change: '+22.4%',
-    isPositive: true,
-    icon: Users,
-  },
-];
-
-const RECENT_ORDERS = [
-  { id: '#ORD-001', orderId: 1042, customer: 'Alex Johnson', product: 'Pro Elite Jersey', amount: '$120', status: 'Completed', date: '2 mins ago' },
-  { id: '#ORD-002', orderId: 1043, customer: 'Sarah Smith', product: 'UFC 300 Ticket', amount: '$800', status: 'Processing', date: '15 mins ago' },
-  { id: '#ORD-003', orderId: 1044, customer: 'Mike Brown', product: 'Carbon Cleats', amount: '$250', status: 'Completed', date: '1 hour ago' },
-  { id: '#ORD-004', orderId: 1045, customer: 'Emma Davis', product: 'NBA Finals Ticket', amount: '$1200', status: 'Pending', date: '2 hours ago' },
-];
+import { useDashboard, useCrmOrders } from '../features/crm/hooks';
 
 export const CrmDashboardPage = () => {
+  const { data: stats, isLoading: isStatsLoading } = useDashboard();
+  const { data: recentOrders = [], isLoading: isOrdersLoading } = useCrmOrders();
+
+  const STATS = [
+    {
+      title: 'Total Revenue',
+      value: isStatsLoading ? '...' : `$${Number(stats?.revenue || 0).toLocaleString()}`,
+      change: '+14.5%', // Mocking change for now as backend doesn't provide historical data yet
+      isPositive: true,
+      icon: DollarSign,
+    },
+    {
+      title: 'Active Events',
+      value: isStatsLoading ? '...' : String(stats?.events_count || 0),
+      change: '+2',
+      isPositive: true,
+      icon: Calendar,
+    },
+    {
+      title: 'Orders',
+      value: isStatsLoading ? '...' : String(stats?.orders_count || 0),
+      change: '+5.2%',
+      isPositive: true,
+      icon: ShoppingBag,
+    },
+    {
+      title: 'Total Customers',
+      value: isStatsLoading ? '...' : String(stats?.customers_count || 0),
+      change: '+22.4%',
+      isPositive: true,
+      icon: Users,
+    },
+  ];
+
+  const displayOrders = recentOrders.slice(0, 4);
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -116,18 +115,28 @@ export const CrmDashboardPage = () => {
             <Link to="/crm/orders" className="text-[#39ff14] text-xs font-bold tracking-widest uppercase hover:underline">View All</Link>
           </div>
           <div className="space-y-4">
-            {RECENT_ORDERS.map((order, i) => (
-              <Link key={i} to={`/crm/orders/${order.orderId}`} className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors border border-transparent hover:border-white/10">
-                <div>
-                  <div className="text-white text-sm font-bold mb-1">{order.customer}</div>
-                  <div className="text-gray-500 text-[10px] font-bold tracking-widest uppercase">{order.product}</div>
-                </div>
-                <div className="text-right">
-                  <div className="text-[#39ff14] text-sm font-black mb-1">{order.amount}</div>
-                  <div className="text-gray-500 text-[10px] font-bold tracking-widest uppercase">{order.date}</div>
-                </div>
-              </Link>
-            ))}
+            {isOrdersLoading ? (
+              <div className="text-gray-500 text-xs font-bold tracking-widest uppercase">Loading orders...</div>
+            ) : displayOrders.length === 0 ? (
+              <div className="text-gray-500 text-xs font-bold tracking-widest uppercase">No recent orders</div>
+            ) : (
+              displayOrders.map((order, i) => (
+                <Link key={i} to={`/crm/orders/${order.id}`} className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors border border-transparent hover:border-white/10">
+                  <div>
+                    <div className="text-white text-sm font-bold mb-1">{order.contact.name}</div>
+                    <div className="text-gray-500 text-[10px] font-bold tracking-widest uppercase">
+                      {order.items.length} item(s)
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[#39ff14] text-sm font-black mb-1">${Number(order.total).toFixed(2)}</div>
+                    <div className="text-gray-500 text-[10px] font-bold tracking-widest uppercase">
+                      {new Date(order.created_at).toLocaleDateString()}
+                    </div>
+                  </div>
+                </Link>
+              ))
+            )}
           </div>
         </div>
       </div>

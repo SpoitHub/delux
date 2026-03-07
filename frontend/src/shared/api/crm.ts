@@ -1,19 +1,5 @@
-import type { Event, Product, Order } from '../../entities/types';
-import {
-  SEEDED_ORDERS,
-  getMockOrder,
-} from './mock-data';
-import { apiRequest, getAuthToken } from './client';
-import { useAuthStore } from '../../features/auth/store';
-
-function getCrmUserId(): number {
-  return useAuthStore.getState().user?.id ?? 0;
-}
-
-function findAnyOrder(id: number | string): Order | undefined {
-  return getMockOrder(getCrmUserId(), id)
-    ?? SEEDED_ORDERS.find((o) => o.id === Number(id));
-}
+import type { Event, Product, Order } from "../../entities/types";
+import { apiRequest, getAuthToken } from "./client";
 
 // ── Dashboard ──
 
@@ -25,13 +11,7 @@ export interface DashboardStats {
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {
-  // Will be replaced when crm_app is implemented
-  return {
-    events_count: 0,
-    orders_count: SEEDED_ORDERS.length,
-    revenue: SEEDED_ORDERS.reduce((sum, o) => sum + o.total, 0),
-    customers_count: 8,
-  };
+  return apiRequest<DashboardStats>("/crm/dashboard/", {}, getAuthToken());
 }
 
 // ── CRM Events ──
@@ -39,19 +19,24 @@ export async function getDashboardStats(): Promise<DashboardStats> {
 export interface CrmEventPayload {
   title?: string;
   description?: string;
-  format?: 'online' | 'offline';
+  format?: "online" | "offline";
   start_datetime?: string;
   end_datetime?: string;
   is_free?: boolean;
-  status?: 'draft' | 'published' | 'cancelled' | 'completed';
+  status?: "draft" | "published" | "cancelled" | "completed";
   location?: { city: string; address: string } | null;
   online_info?: { url: string; platform?: string } | null;
-  ticket_types?: Array<{ id?: number; name: string; price: number; quantity_total: number }>;
+  ticket_types?: Array<{
+    id?: number;
+    name: string;
+    price: number;
+    quantity_total: number;
+  }>;
   image?: File | null;
 }
 
 export async function getCrmEvents(): Promise<Event[]> {
-  return apiRequest<Event[]>('/crm/events/', {}, getAuthToken());
+  return apiRequest<Event[]>("/crm/events/", {}, getAuthToken());
 }
 
 export async function getCrmEvent(id: number | string): Promise<Event> {
@@ -71,41 +56,65 @@ export async function createCrmEvent(data: CrmEventPayload): Promise<Event> {
   }
 
   // Nested objects as JSON strings (backend parses them in to_internal_value)
-  if (location !== undefined) form.append('location', JSON.stringify(location));
-  if (online_info !== undefined) form.append('online_info', JSON.stringify(online_info));
-  if (ticket_types !== undefined) form.append('ticket_types', JSON.stringify(ticket_types));
+  if (location !== undefined) form.append("location", JSON.stringify(location));
+  if (online_info !== undefined)
+    form.append("online_info", JSON.stringify(online_info));
+  if (ticket_types !== undefined)
+    form.append("ticket_types", JSON.stringify(ticket_types));
 
   // Image file
-  if (image) form.append('image', image);
+  if (image) form.append("image", image);
 
-  return apiRequest<Event>('/crm/events/', { method: 'POST', body: form }, getAuthToken());
+  return apiRequest<Event>(
+    "/crm/events/",
+    { method: "POST", body: form },
+    getAuthToken(),
+  );
 }
 
-export async function updateCrmEvent(id: number | string, data: CrmEventPayload): Promise<Event> {
-  return apiRequest<Event>(`/crm/events/${id}/`, {
-    method: 'PATCH',
-    body: JSON.stringify(data),
-  }, getAuthToken());
+export async function updateCrmEvent(
+  id: number | string,
+  data: CrmEventPayload,
+): Promise<Event> {
+  return apiRequest<Event>(
+    `/crm/events/${id}/`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    },
+    getAuthToken(),
+  );
 }
 
 export async function deleteCrmEvent(id: number | string): Promise<void> {
-  await apiRequest<void>(`/crm/events/${id}/`, { method: 'DELETE' }, getAuthToken());
+  await apiRequest<void>(
+    `/crm/events/${id}/`,
+    { method: "DELETE" },
+    getAuthToken(),
+  );
 }
 
 export async function publishCrmEvent(id: number | string): Promise<Event> {
-  await apiRequest<{ status: string }>(`/crm/events/${id}/publish/`, {
-    method: 'POST',
-  }, getAuthToken());
+  await apiRequest<{ status: string }>(
+    `/crm/events/${id}/publish/`,
+    {
+      method: "POST",
+    },
+    getAuthToken(),
+  );
   return getCrmEvent(id);
 }
 
 export async function unpublishCrmEvent(id: number | string): Promise<Event> {
-  await apiRequest<{ status: string }>(`/crm/events/${id}/unpublish/`, {
-    method: 'POST',
-  }, getAuthToken());
+  await apiRequest<{ status: string }>(
+    `/crm/events/${id}/unpublish/`,
+    {
+      method: "POST",
+    },
+    getAuthToken(),
+  );
   return getCrmEvent(id);
 }
-
 
 // ── CRM Products ──
 
@@ -119,47 +128,72 @@ export interface CrmProductPayload {
   image?: File | null;
 }
 
-export async function getCrmCategories(): Promise<import('../../entities/types').Category[]> {
-  return apiRequest('/crm/products/categories/', {}, getAuthToken());
+export async function getCrmCategories(): Promise<
+  import("../../entities/types").Category[]
+> {
+  return apiRequest("/crm/products/categories/", {}, getAuthToken());
 }
 
-export async function createCategory(name: string): Promise<import('../../entities/types').Category> {
-  return apiRequest('/crm/products/categories/', {
-    method: 'POST',
-    body: JSON.stringify({ name }),
-  }, getAuthToken());
+export async function createCategory(
+  name: string,
+): Promise<import("../../entities/types").Category> {
+  return apiRequest(
+    "/crm/products/categories/",
+    {
+      method: "POST",
+      body: JSON.stringify({ name }),
+    },
+    getAuthToken(),
+  );
 }
 
 export async function getCrmProducts(): Promise<Product[]> {
-  return apiRequest<Product[]>('/crm/products/', {}, getAuthToken());
+  return apiRequest<Product[]>("/crm/products/", {}, getAuthToken());
 }
 
 export async function getCrmProduct(id: number | string): Promise<Product> {
   return apiRequest<Product>(`/crm/products/${id}/`, {}, getAuthToken());
 }
 
-export async function createCrmProduct(data: CrmProductPayload): Promise<Product> {
+export async function createCrmProduct(
+  data: CrmProductPayload,
+): Promise<Product> {
   const { image, ...rest } = data;
   const form = new FormData();
   for (const [key, val] of Object.entries(rest)) {
     if (val !== undefined && val !== null) form.append(key, String(val));
   }
-  if (image) form.append('image', image);
-  return apiRequest<Product>('/crm/products/', { method: 'POST', body: form }, getAuthToken());
+  if (image) form.append("image", image);
+  return apiRequest<Product>(
+    "/crm/products/",
+    { method: "POST", body: form },
+    getAuthToken(),
+  );
 }
 
-export async function updateCrmProduct(id: number | string, data: CrmProductPayload): Promise<Product> {
+export async function updateCrmProduct(
+  id: number | string,
+  data: CrmProductPayload,
+): Promise<Product> {
   const { image, ...rest } = data;
   const form = new FormData();
   for (const [key, val] of Object.entries(rest)) {
     if (val !== undefined && val !== null) form.append(key, String(val));
   }
-  if (image) form.append('image', image);
-  return apiRequest<Product>(`/crm/products/${id}/`, { method: 'PATCH', body: form }, getAuthToken());
+  if (image) form.append("image", image);
+  return apiRequest<Product>(
+    `/crm/products/${id}/`,
+    { method: "PATCH", body: form },
+    getAuthToken(),
+  );
 }
 
 export async function deleteCrmProduct(id: number | string): Promise<void> {
-  await apiRequest<void>(`/crm/products/${id}/`, { method: 'DELETE' }, getAuthToken());
+  await apiRequest<void>(
+    `/crm/products/${id}/`,
+    { method: "DELETE" },
+    getAuthToken(),
+  );
 }
 
 export async function addProductImage(
@@ -168,9 +202,13 @@ export async function addProductImage(
   isPrimary = false,
 ): Promise<{ id: number; image: string; is_primary: boolean }> {
   const form = new FormData();
-  form.append('image', imageFile);
-  form.append('is_primary', String(isPrimary));
-  return apiRequest(`/crm/products/${productId}/images/`, { method: 'POST', body: form }, getAuthToken());
+  form.append("image", imageFile);
+  form.append("is_primary", String(isPrimary));
+  return apiRequest(
+    `/crm/products/${productId}/images/`,
+    { method: "POST", body: form },
+    getAuthToken(),
+  );
 }
 
 // ── CRM Orders ──
@@ -182,71 +220,78 @@ export interface CrmOrderFilters {
   date_to?: string;
 }
 
-export async function getCrmOrders(filters?: CrmOrderFilters): Promise<Order[]> {
-  let orders = [...SEEDED_ORDERS];
+export async function getCrmOrders(
+  filters?: CrmOrderFilters,
+): Promise<Order[]> {
+  const params = new URLSearchParams();
+  if (filters?.status) params.append("status", filters.status);
+  if (filters?.payment_status)
+    params.append("payment_status", filters.payment_status);
+  // Optional date filters can be added here if needed
 
-  if (filters?.status) {
-    orders = orders.filter((o) => o.status === filters.status);
-  }
-  if (filters?.payment_status) {
-    orders = orders.filter((o) => o.payment_status === filters.payment_status);
-  }
-
-  return orders;
+  const query = params.toString() ? `?${params.toString()}` : "";
+  const res = await apiRequest<{ results?: Order[] } | Order[]>(`/crm/orders/${query}`, {}, getAuthToken());
+  return Array.isArray(res) ? res : (res.results ?? []);
 }
 
 export async function getCrmOrder(id: number | string): Promise<Order> {
-  const order = findAnyOrder(id);
-  if (!order) throw new Error('Order not found');
-  return order;
+  return apiRequest<Order>(`/crm/orders/${id}/`, {}, getAuthToken());
 }
 
 export async function updateCrmOrderStatus(
   id: number | string,
-  status: Order['status'],
+  status: Order["status"],
 ): Promise<Order> {
-  const order = findAnyOrder(id);
-  if (!order) throw new Error('Order not found');
-  return { ...order, status, updated_at: new Date().toISOString() };
+  return apiRequest<Order>(
+    `/crm/orders/${id}/`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    },
+    getAuthToken(),
+  );
 }
 
 // ── CRM Customers ──
 
 export interface CrmCustomer {
   id: number;
-  name: string;
   email: string;
-  orders: number;
-  total_spent: number;
-  joined: string;
-  last_order: string;
-  notes: string[];
+  first_name: string;
+  last_name: string;
+  orders_count: number;
+  total_spent: string | number;
+  last_order_date: string | null;
+  notes: { id: number; note_text: string; created_at: string }[];
+  orders: Order[];
 }
-
-const MOCK_CUSTOMERS: CrmCustomer[] = [
-  { id: 1, name: 'Alex Johnson', email: 'alex.j@example.com', orders: 12, total_spent: 342000, joined: 'Jan 2024', last_order: 'Feb 20, 2026', notes: [] },
-  { id: 2, name: 'Sarah Smith', email: 'sarah.s@example.com', orders: 8, total_spent: 215000, joined: 'Feb 2024', last_order: 'Feb 18, 2026', notes: [] },
-  { id: 3, name: 'Mike Brown', email: 'mike.b@example.com', orders: 5, total_spent: 98000, joined: 'Mar 2024', last_order: 'Feb 15, 2026', notes: [] },
-  { id: 4, name: 'Emma Davis', email: 'emma.d@example.com', orders: 15, total_spent: 560000, joined: 'Jan 2024', last_order: 'Feb 22, 2026', notes: [] },
-  { id: 5, name: 'James Wilson', email: 'james.w@example.com', orders: 3, total_spent: 45000, joined: 'May 2024', last_order: 'Feb 10, 2026', notes: [] },
-  { id: 6, name: 'Olivia Martinez', email: 'olivia.m@example.com', orders: 9, total_spent: 287000, joined: 'Feb 2024', last_order: 'Feb 19, 2026', notes: [] },
-  { id: 7, name: 'William Garcia', email: 'william.g@example.com', orders: 1, total_spent: 12000, joined: 'Oct 2024', last_order: 'Feb 5, 2026', notes: [] },
-  { id: 8, name: 'Sophia Lee', email: 'sophia.l@example.com', orders: 22, total_spent: 890000, joined: 'Dec 2023', last_order: 'Feb 25, 2026', notes: [] },
-];
 
 export async function getCrmCustomers(): Promise<CrmCustomer[]> {
-  return [...MOCK_CUSTOMERS];
+  const res = await apiRequest<{ results?: CrmCustomer[] } | CrmCustomer[]>("/crm/customers/", {}, getAuthToken());
+  return Array.isArray(res) ? res : (res.results ?? []);
 }
 
-export async function getCrmCustomer(userId: number | string): Promise<CrmCustomer> {
-  const customer = MOCK_CUSTOMERS.find((c) => c.id === Number(userId));
-  if (!customer) throw new Error('Customer not found');
-  return customer;
+export async function getCrmCustomer(
+  userId: number | string,
+): Promise<CrmCustomer> {
+  return apiRequest<CrmCustomer>(
+    `/crm/customers/${userId}/`,
+    {},
+    getAuthToken(),
+  );
 }
 
-export async function addCustomerNote(userId: number | string, note: string): Promise<CrmCustomer> {
-  const customer = MOCK_CUSTOMERS.find((c) => c.id === Number(userId));
-  if (!customer) throw new Error('Customer not found');
-  customer.notes.push(note);
-  return customer;
+export async function addCustomerNote(
+  userId: number | string,
+  note: string,
+): Promise<CrmCustomer> {
+  await apiRequest(
+    `/crm/customers/${userId}/notes/`,
+    {
+      method: "POST",
+      body: JSON.stringify({ note_text: note }),
+    },
+    getAuthToken(),
+  );
+  return getCrmCustomer(userId);
 }
