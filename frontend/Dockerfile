@@ -1,17 +1,30 @@
-FROM node:20-alpine
+# Build stage
+FROM node:20-alpine as builder
 
 # Install pnpm
 RUN npm install -g pnpm
 
 WORKDIR /app
 
-# Install dependencies (cache layer)
+# Install dependencies
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
 # Copy source
 COPY . .
 
-EXPOSE 5173
+# Build
+RUN pnpm build
 
-CMD ["pnpm", "dev", "--host", "0.0.0.0"]
+# Production stage
+FROM nginx:alpine
+
+# Copy built assets
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Copy nginx config
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
