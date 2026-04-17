@@ -69,6 +69,7 @@ export const CheckoutPage = () => {
     },
   });
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const deliveryType = watch('delivery_type');
 
   if (cartLoading) return <PageSpinner />;

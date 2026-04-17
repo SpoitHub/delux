@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Save, Calendar, MapPin, Globe, Image, Trash2, AlertTriangle } from 'lucide-react';
 import { useToast } from '../shared/ui/toast-context';
@@ -26,7 +26,7 @@ export const CrmEventEditPage = () => {
   const [isFree, setIsFree] = useState(false);
   const [eventStatus, setEventStatus] = useState<'draft' | 'published' | 'cancelled' | 'completed'>('draft');
 
-  const seedForm = useCallback(() => {
+  useEffect(() => {
     if (event) {
       setTitle(event.title);
       setDescription(event.description);
@@ -41,10 +41,6 @@ export const CrmEventEditPage = () => {
       setEventStatus(event.status);
     }
   }, [event]);
-
-  useEffect(() => {
-    seedForm();
-  }, [seedForm]);
 
   if (isLoading) {
     return <div className="flex items-center justify-center py-24 text-gray-500 text-sm">Loading event...</div>;

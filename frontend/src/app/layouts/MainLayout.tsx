@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useCallback } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../features/auth/store";
 import { useCartStore } from "../../features/cart/store";
@@ -24,13 +24,9 @@ export const MainLayout = () => {
   }, []);
 
   // Закрыть при смене маршрута
-  const closeDropdown = useCallback(() => {
-    setDropdownOpen(false);
-  }, []);
-
   useEffect(() => {
-    closeDropdown();
-  }, [location.pathname, closeDropdown]);
+    setDropdownOpen(false);
+  }, [location.pathname]);
 
   const handleLogout = async () => {
     await logout();

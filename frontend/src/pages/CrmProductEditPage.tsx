@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Save, Package, Image, Trash2, AlertTriangle, X } from 'lucide-react';
 import { useToast } from '../shared/ui/toast-context';
@@ -31,7 +31,7 @@ export const CrmProductEditPage = () => {
   const imageInputRef = useRef<HTMLInputElement>(null);
 
   // Seed form when product loads
-  const seedForm = useCallback(() => {
+  useEffect(() => {
     if (product && !seeded) {
       setTitle(product.title);
       setDescription(product.description);
@@ -42,10 +42,6 @@ export const CrmProductEditPage = () => {
       setSeeded(true);
     }
   }, [product, seeded]);
-
-  useEffect(() => {
-    seedForm();
-  }, [seedForm]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null;
