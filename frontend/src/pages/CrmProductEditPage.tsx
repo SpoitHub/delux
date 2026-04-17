@@ -31,9 +31,9 @@ export const CrmProductEditPage = () => {
   const imageInputRef = useRef<HTMLInputElement>(null);
 
   // Seed form when product loads
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (product && !seeded) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTitle(product.title);
       setDescription(product.description);
       setPrice(String(product.price));
