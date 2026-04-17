@@ -26,6 +26,7 @@ export const CrmEventEditPage = () => {
   const [isFree, setIsFree] = useState(false);
   const [eventStatus, setEventStatus] = useState<'draft' | 'published' | 'cancelled' | 'completed'>('draft');
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (event) {
       setTitle(event.title);

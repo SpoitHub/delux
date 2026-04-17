@@ -24,6 +24,7 @@ export const MainLayout = () => {
   }, []);
 
   // Закрыть при смене маршрута
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     setDropdownOpen(false);
   }, [location.pathname]);
