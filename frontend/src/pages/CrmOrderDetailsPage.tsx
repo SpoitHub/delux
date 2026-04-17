@@ -2,6 +2,7 @@ import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Package, MapPin, CreditCard, User, ShoppingBag, Ticket, Calendar } from 'lucide-react';
 import { formatPrice, formatDateTime } from '../shared/lib/formatters';
 import { getMockOrder } from '../shared/api/mock-data';
+import { useAuthStore } from '../features/auth/store';
 
 const STATUS_STYLES: Record<string, string> = {
   pending: 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20',
@@ -17,7 +18,8 @@ const STATUS_STYLES: Record<string, string> = {
 
 export const CrmOrderDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
-  const order = getMockOrder(id ?? '');
+  const { user } = useAuthStore();
+  const order = getMockOrder(user?.id ?? 1, id ?? '');
 
   if (!order) {
     return (

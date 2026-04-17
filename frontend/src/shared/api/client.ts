@@ -19,10 +19,8 @@ export async function apiRequest<T>(
     let detail = `HTTP ${res.status}`;
     try {
       const body = await res.json();
-      detail =
-        body.detail ??
-        Object.values(body as Record<string, unknown>)?.[0]?.[0] ??
-        JSON.stringify(body);
+      const firstError = Object.values(body)?.[0];
+      detail = body.detail ?? (Array.isArray(firstError) ? String(firstError[0]) : JSON.stringify(body));
     } catch { /* ignore */ }
     throw new Error(detail);
   }
