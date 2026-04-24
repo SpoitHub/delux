@@ -94,6 +94,20 @@
               {
                 "id": "custom.width",
                 "value": 300
+              },
+              {
+                "id": "custom.displayMode",
+                "value": "color-background"
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": false,
+                    "title": "View Logs",
+                    "url": "/d/docker-containers?var-container_name=${__data.fields.container_name}"
+                  }
+                ]
               }
             ]
           },
@@ -359,7 +373,7 @@
       "pluginVersion": "9.0.0",
       "targets": [
         {
-          "expr": "{job=\"docker\"}",
+          "expr": "{container_name=~\"/?${container_name}\"}",
           "refId": "A"
         }
       ],
@@ -372,7 +386,37 @@
   "style": "dark",
   "tags": ["docker", "containers", "monitoring"],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "current": {
+          "selected": true,
+          "text": "delux_backend",
+          "value": "delux_backend"
+        },
+        "datasource": "Prometheus",
+        "definition": "label_values(docker_container_info, container_name)",
+        "description": null,
+        "error": null,
+        "hide": 0,
+        "includeAll": true,
+        "label": "Container",
+        "multi": false,
+        "name": "container_name",
+        "options": [],
+        "query": {
+          "query": "label_values(docker_container_info, container_name)",
+          "refId": "Prometheus-container_name-Variable Query"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
   },
   "time": {
     "from": "now-1h",

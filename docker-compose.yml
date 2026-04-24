@@ -106,6 +106,7 @@ services:
     image: grafana/loki:latest
     container_name: delux_loki
     restart: always
+    user: root
     ports:
       - "3100:3100"
     volumes:
