@@ -34,11 +34,101 @@ services:
       - ./frontend:/app
       - /app/node_modules
     ports:
-      - "5174:5173"
+      - "5174:80"
     depends_on:
       - backend
     environment:
       - VITE_API_URL=http://localhost:8000/api/v1
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: delux_prometheus
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    depends_on:
+      - backend
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: delux_grafana
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_storage:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini
+    env_file:
+      - ./grafana/.env
+    environment:
+      - GF_PATHS_CONFIG=/etc/grafana/grafana.ini
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - db
+      - prometheus
+      - loki
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: delux_cadvisor
+    restart: always
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    devices:
+      - /dev/kmsg
+    privileged: true
+
+  docker-exporter:
+    build: ./docker-exporter
+    container_name: delux_docker_exporter
+    restart: always
+    ports:
+      - "8888:8888"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    privileged: true
+
+  loki:
+    image: grafana/loki:latest
+    container_name: delux_loki
+    restart: always
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki/loki-config.yml:/etc/loki/local-config.yml
+      - loki_storage:/loki
+    command: -config.file=/etc/loki/local-config.yml
+    depends_on:
+      - prometheus
+
+  promtail:
+    image: grafana/promtail:latest
+    container_name: delux_promtail
+    restart: always
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./promtail/promtail-config.yml:/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+
 volumes:
   postgres_data:
+  prometheus_data:
+  grafana_storage:
+  loki_storage:
