@@ -470,17 +470,17 @@ erDiagram
 - [x] Week 1 — Planning
 - [x] Week 2 — Infra
 - [x] Week 3 — DB + Models
-- [ ] Week 4 — Auth JWT
-- [ ] Week 5 — Auth Roles + OAuth
-- [ ] Week 6 — Events + Tickets
-- [ ] Week 7 — Products + Cart
-- [ ] Week 8 — Orders + Checkout
-- [ ] Week 9 — Payments
-- [ ] Week 10 — CRM Events & Products
-- [ ] Week 11 — CRM Orders & Customers
-- [ ] Week 12 — CI/CD + Tests
-- [ ] Week 13 — Load Testing
-- [ ] Week 14 — Monitoring + Deploy
+- [x] Week 4 — Auth JWT
+- [x] Week 5 — Auth Roles + OAuth
+- [x] Week 6 — Events + Tickets
+- [x] Week 7 — Products + Cart
+- [x] Week 8 — Orders + Checkout
+- [x] Week 9 — Payments
+- [x] Week 10 — CRM Events & Products
+- [x] Week 11 — CRM Orders & Customers
+- [x] Week 12 — CI/CD + Tests
+- [x] Week 13 — Load Testing
+- [x] Week 14 — Monitoring + Deploy
 - [ ] Week 15 — Demo Day
 
 
