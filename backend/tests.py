@@ -1,10 +1,11 @@
 import pytest
+from django.db import connection
 
 
 @pytest.mark.django_db
 def test_database_connection():
     """Test that database connection works"""
-    assert True
+    assert connection.vendor in {'sqlite', 'postgresql'}
 
 
 def test_basic_math():

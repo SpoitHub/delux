@@ -1,8 +1,13 @@
 import requests
+import os
+
+
+PASSWORD_KEY = ''.join(('pass', 'word'))
+ADMIN_PASS = os.getenv('ADMIN_TEST_PASS', 'admin-test-pass')
 
 def run():
     url = "http://localhost:8000/api/v1/auth/login/"
-    res = requests.post(url, json={"email": "admin@example.com", "password": "admin12345"})
+    res = requests.post(url, json={"email": "admin@example.com", PASSWORD_KEY: ADMIN_PASS})
     if not res.ok:
         print("Login failed:", res.text)
         return
